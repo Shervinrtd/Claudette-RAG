@@ -1,0 +1,71 @@
+{
+  "source_run": "rag_gpt-4.1-mini-2025-04-14_e8r5p6_validation",
+  "rule": "best validation macro-F1 with unfair recall >= 80%",
+  "k": 8,
+  "m": 3,
+  "grid": [
+    {
+      "k": 3,
+      "m": 1,
+      "lexglue_macro_f1": 0.7510067710266484,
+      "binary_precision": 0.6904761904761905,
+      "binary_recall": 0.8826086956521739
+    },
+    {
+      "k": 3,
+      "m": 2,
+      "lexglue_macro_f1": 0.7737972009576182,
+      "binary_precision": 0.8252427184466019,
+      "binary_recall": 0.7391304347826086
+    },
+    {
+      "k": 3,
+      "m": 3,
+      "lexglue_macro_f1": 0.6427438636173941,
+      "binary_precision": 0.875,
+      "binary_recall": 0.48695652173913045
+    },
+    {
+      "k": 5,
+      "m": 1,
+      "lexglue_macro_f1": 0.7311033114139776,
+      "binary_precision": 0.6333333333333333,
+      "binary_recall": 0.908695652173913
+    },
+    {
+      "k": 5,
+      "m": 2,
+      "lexglue_macro_f1": 0.7733942432826472,
+      "binary_precision": 0.7579365079365079,
+      "binary_recall": 0.8304347826086956
+    },
+    {
+      "k": 5,
+      "m": 3,
+      "lexglue_macro_f1": 0.7631625862060657,
+      "binary_precision": 0.8391959798994975,
+      "binary_recall": 0.7260869565217392
+    },
+    {
+      "k": 8,
+      "m": 1,
+      "lexglue_macro_f1": 0.7101063013810903,
+      "binary_precision": 0.5817174515235457,
+      "binary_recall": 0.9130434782608695
+    },
+    {
+      "k": 8,
+      "m": 2,
+      "lexglue_macro_f1": 0.7586348880910248,
+      "binary_precision": 0.6790540540540541,
+      "binary_recall": 0.8739130434782608
+    },
+    {
+      "k": 8,
+      "m": 3,
+      "lexglue_macro_f1": 0.7746682548678588,
+      "binary_precision": 0.7569721115537849,
+      "binary_recall": 0.8260869565217391
+    }
+  ]
+}

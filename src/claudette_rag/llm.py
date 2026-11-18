@@ -72,8 +72,19 @@ def zero_shot_messages(system_prompt: str, sentence: str) -> list[dict]:
             {"role": "user", "content": f"Sentence: {sentence}"}]
 
 
-def response_format(category_codes: list[str]) -> dict:
-    """Strict JSON schema for the answer (OpenAI structured outputs)."""
+def response_format(category_codes: list[str], with_citations: bool = False) -> dict:
+    """Strict JSON schema for the answer (OpenAI structured outputs).
+
+    with_citations (RAG): a "cited_ids" field between the explanation and the verdict, for
+    the ids of the retrieved items the decision relies on. It is a free list of strings,
+    not an enum of the retrieved ids, so that the schema is the same for every sentence;
+    the cited ids are checked against the retrieved ones afterwards (rag.check_citations).
+    """
+    properties = {"explanation": {"type": "string"}}
+    if with_citations:
+        properties["cited_ids"] = {"type": "array", "items": {"type": "string"}}
+    properties["unfair"] = {"type": "boolean"}
+    properties["categories"] = {"type": "array", "items": {"type": "string", "enum": category_codes}}
     return {
         "type": "json_schema",
         "json_schema": {
@@ -81,12 +92,8 @@ def response_format(category_codes: list[str]) -> dict:
             "strict": True,
             "schema": {
                 "type": "object",
-                "properties": {
-                    "explanation": {"type": "string"},
-                    "unfair": {"type": "boolean"},
-                    "categories": {"type": "array", "items": {"type": "string", "enum": category_codes}},
-                },
-                "required": ["explanation", "unfair", "categories"],
+                "properties": properties,
+                "required": list(properties),
                 "additionalProperties": False,
             },
         },
@@ -95,20 +102,25 @@ def response_format(category_codes: list[str]) -> dict:
 
 # ----------------------------------------------------------------------------- parsing
 def parse_answer(content: str, code_to_label: dict[str, int]) -> dict:
-    """JSON answer -> {"labels", "explanation", "consistent"}.
+    """JSON answer -> {"labels", "explanation", "cited_ids", "consistent", "parse_error"}.
 
     The verdict decides: if "unfair" is false the sentence is fair, whatever the categories;
     if "unfair" is true but no category is given, the sentence is counted as fair (we cannot
     score an unfair verdict without a category). Both cases are flagged as inconsistent.
+    "cited_ids" is empty for answers without citations (plain LLM baseline).
     """
     try:
         answer = json.loads(content)
     except (json.JSONDecodeError, TypeError):
-        return {"labels": [], "explanation": None, "consistent": False, "parse_error": True}
+        return {"labels": [], "explanation": None, "cited_ids": [], "consistent": False,
+                "parse_error": True}
     codes = [c for c in answer.get("categories", []) if c in code_to_label]
     unfair = bool(answer.get("unfair"))
     labels = sorted({code_to_label[c] for c in codes}) if unfair else []
-    return {"labels": labels, "explanation": answer.get("explanation"),
+    # ids as written in the prompt, "[dir93.annex.1q]", are accepted with or without brackets
+    cleaned = (str(c).strip().strip("[]").strip() for c in answer.get("cited_ids", []) or [])
+    cited = list(dict.fromkeys(c for c in cleaned if c))
+    return {"labels": labels, "explanation": answer.get("explanation"), "cited_ids": cited,
             "consistent": unfair == bool(codes), "parse_error": False}
 
 

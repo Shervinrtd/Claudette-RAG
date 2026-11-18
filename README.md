@@ -161,6 +161,32 @@ Retrieval quality with bge-m3 on the validation set (230 unfair and 2,045 fair s
 
 With 8 examples and 5 rationales, 97% of the unfair sentences receive at least one example and one rationale of their own category, so the evidence the LLM needs is almost always in its context. For fair sentences about 93% of the retrieved examples are fair, which gives the LLM evidence against false alarms. The retrieved examples alone already carry a strong signal: the kNN vote (k=3, t=2), with no training and no LLM, scores 77.8 macro-F1 on test, close to TF-IDF+SVM, with the recall of Legal-BERT (82.6). Its weak point is arbitration (precision 46.7), the same category where the plain LLM raises most false alarms: sentences of an arbitration section look alike, whether they are unfair or not.
 
+## RAG system (Phase 4)
+
+The RAG system (`src/claudette_rag/rag.py`, `scripts/run_rag.py`) uses the same model, settings, task description and category cards as the plain LLM baseline; the only difference is the retrieved knowledge in the prompt: before each sentence, the 8 most similar training sentences with their expert labels, 5 legal rationales and the linked legal provisions, each with an id. The answer must list in `cited_ids` the retrieved items the decision relies on, and the citations are checked against what was actually retrieved. Every answer is saved with its explanation, citations and retrieved ids in `results/explanations/`.
+
+All choices are made on the validation set; the test set is used once, at the end.
+
+```powershell
+.\.venv\Scripts\python scripts\run_rag.py --dry-run         # one real prompt and the cost estimate, no API call
+.\.venv\Scripts\python scripts\run_rag.py --sample 40       # 20 unfair + 20 fair validation sentences
+.\.venv\Scripts\python scripts\run_rag.py                   # full validation set (about $2.30, 30 minutes)
+.\.venv\Scripts\python scripts\gate_rag.py rag_gpt-4.1-mini-2025-04-14_e8r5p6_validation   # evidence gate, free
+```
+
+Results on the **validation** set (2,275 sentences, 230 unfair), gpt-4.1-mini:
+
+| System | LexGLUE micro-F1 | LexGLUE macro-F1 | Unfair precision | Unfair recall | Sentences flagged |
+|---|---|---|---|---|---|
+| Plain LLM (no retrieval) | 83.6 | 60.8 | 38.5 | 92.2 | 550 |
+| kNN vote (k=3, t=2), no LLM | 94.7 | 76.0 | 76.3 | 77.0 | 232 |
+| RAG | 88.9 | 65.7 | 50.2 | 92.2 | 422 |
+| RAG + evidence gate (k=8, m=3) | 94.9 | 77.5 | 75.7 | 82.6 | 251 |
+
+Retrieval helps the LLM: with the same recall, it removes 128 of the 338 false alarms of the plain LLM (arbitration precision rises from 9.0 to 20.5), and 99.8% of its unfair verdicts cite a retrieved rationale or provision, with no invented ids. But the LLM still flags many sentences on their topic and ignores the evidence: of the 210 fair sentences it flags, 132 have at least 6 of their 8 most similar sentences labelled fair by the experts, and 44 have all 8.
+
+The **evidence gate** turns this observation into a transparent rule: a category proposed by the LLM is kept only if at least m of the k most similar expert-labelled sentences have it, so that every flagged clause has both a legal explanation and precedents. (k, m) was chosen on validation by a rule fixed in advance: the best macro-F1 among the settings with unfair recall of at least 80%, since for consumer protection a missed unfair clause is worse than a false alarm. The gate un-flags 171 sentences: 149 false alarms, but also 22 truly unfair clauses (recall 92.2 to 82.6), a trade-off we discuss in the ethical analysis. Validation numbers of the gated system are optimistic because (k, m) was chosen on them; the test set gives the unbiased comparison.
+
 ## Notebooks
 
 | Notebook | Content |
@@ -174,7 +200,7 @@ With 8 examples and 5 rationales, 97% of the unfair sentences receive at least o
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
-- [ ] Phase 4: RAG pipeline (done: retriever, index, retrieval evaluation, kNN baseline; next: RAG prompt with citations)
+- [ ] Phase 4: RAG pipeline (done: retriever, kNN baseline, RAG with cited explanations, evidence gate, validation results; next: ablations and the final test run)
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

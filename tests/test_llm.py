@@ -1,6 +1,7 @@
 """Tests for claudette_rag.llm with a fake OpenAI client (no API calls, no cost)."""
 
 import json
+import time
 from types import SimpleNamespace
 
 import pytest
@@ -110,3 +111,40 @@ def test_estimate_cost():
     rows = [{"prompt_tokens": 1_000_000, "cached_tokens": 0, "completion_tokens": 1_000_000}]
     assert estimate_cost(rows, "gpt-4.1-mini-2025-04-14") == pytest.approx(0.40 + 1.60)
     assert estimate_cost(rows, "unknown-model") != estimate_cost(rows, "unknown-model")  # NaN
+
+
+def test_run_all_stops_cleanly_and_keeps_received_answers(tmp_path):
+    records = [{"id": f"s{i}", "text": f"sentence {i}"} for i in range(6)]
+    make = lambda r: zero_shot_messages("system", r["text"])  # noqa: E731
+
+    def failing_answer(kwargs):
+        time.sleep(0.05)                                          # a real request takes time
+        if kwargs["messages"][-1]["content"].endswith("sentence 2"):
+            raise ValueError("no credits remaining")             # not retryable: fails at once
+        return json.dumps({"explanation": "x", "unfair": False, "categories": []})
+
+    client, completions = fake_client(failing_answer)
+    log = tmp_path / "log.jsonl"
+    with pytest.raises(ValueError):
+        run_all(records, make, client, "gpt-4.1-mini", response_format(["ter"]), log, workers=1)
+    saved = [json.loads(line)["id"] for line in log.read_text().splitlines()]
+    assert len(completions.calls) < len(records)                  # waiting requests were cancelled
+    assert len(saved) == len(completions.calls) - 1 and "s2" not in saved   # every answer received is kept
+
+
+def test_out_of_credits_is_not_retried():
+    openai = pytest.importorskip("openai")
+    httpx = pytest.importorskip("httpx")
+    response = httpx.Response(429, request=httpx.Request("POST", "https://api.openai.com/v1/chat/completions"))
+    no_credits = openai.RateLimitError("no credits", response=response, body={"code": "insufficient_quota"})
+    busy = openai.RateLimitError("slow down", response=response, body={"code": "rate_limit_exceeded"})
+
+    def raise_no_credits(kwargs):
+        raise no_credits
+
+    client, completions = fake_client(raise_no_credits)
+    with pytest.raises(openai.RateLimitError):
+        call_model(client, "gpt-4.1-mini", zero_shot_messages("s", "x"), response_format(["ter"]))
+    assert len(completions.calls) == 1                             # no waiting, no retries
+    from claudette_rag.llm import _is_retryable
+    assert _is_retryable(busy) and not _is_retryable(no_credits)

@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 from pathlib import Path
 
 DEFAULT_MODEL = "gpt-4.1-mini-2025-04-14"
@@ -130,6 +130,8 @@ def _is_retryable(error: Exception) -> bool:
         import openai
     except ImportError:  # pragma: no cover
         return False
+    if getattr(error, "code", None) == "insufficient_quota":   # no credits left: waiting will not help
+        return False
     return isinstance(error, (openai.RateLimitError, openai.APIConnectionError,
                               openai.APITimeoutError, openai.InternalServerError))
 
@@ -163,7 +165,12 @@ def call_model(client, model: str, messages: list[dict], fmt: dict, max_retries:
 
 def run_all(records: list[dict], make_messages, client, model: str, fmt: dict, log_path: Path,
             workers: int = 4, progress_every: int = 50) -> dict[str, dict]:
-    """Classify every record; answers are appended to log_path and reused on a re-run."""
+    """Classify every record; answers are appended to log_path and reused on a re-run.
+
+    If a request fails for good (no credits left, Ctrl+C, ...), the requests still waiting
+    are cancelled, the answers already received are saved, and the error is raised again:
+    running the same command later continues from where it stopped.
+    """
     log_path = Path(log_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     done: dict[str, dict] = {}
@@ -179,16 +186,31 @@ def run_all(records: list[dict], make_messages, client, model: str, fmt: dict, l
 
     lock = threading.Lock()
     with log_path.open("a", encoding="utf-8") as f, ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(call_model, client, model, make_messages(r), fmt): r for r in todo}
-        for n, future in enumerate(as_completed(futures), start=1):
-            record = futures[future]
-            row = {"id": record["id"], "model": model, **future.result()}
+
+        def save(record: dict, result: dict) -> None:
+            row = {"id": record["id"], "model": model, **result}
             with lock:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
                 f.flush()
                 done[record["id"]] = row
-            if n % progress_every == 0 or n == len(todo):
-                print(f"  {n}/{len(todo)} answered")
+
+        futures = {pool.submit(call_model, client, model, make_messages(r), fmt): r for r in todo}
+        try:
+            for n, future in enumerate(as_completed(futures), start=1):
+                save(futures[future], future.result())
+                if n % progress_every == 0 or n == len(todo):
+                    print(f"  {n}/{len(todo)} answered")
+        except BaseException as error:
+            for future in futures:
+                future.cancel()                       # requests not sent yet are dropped
+            wait(futures)                             # requests already sent finish
+            for future, record in futures.items():    # keep every answer received (and paid for)
+                if (future.done() and not future.cancelled() and future.exception() is None
+                        and record["id"] not in done):
+                    save(record, future.result())
+            print(f"\nStopped by {type(error).__name__}: {error}\n{len(done)} answers are saved in "
+                  f"{log_path.name}: run the same command again to continue from there.")
+            raise
     return done
 
 

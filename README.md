@@ -187,6 +187,24 @@ Retrieval helps the LLM: with the same recall, it removes 128 of the 338 false a
 
 The **evidence gate** turns this observation into a transparent rule: a category proposed by the LLM is kept only if at least m of the k most similar expert-labelled sentences have it, so that every flagged clause has both a legal explanation and precedents. (k, m) was chosen on validation by a rule fixed in advance: the best macro-F1 among the settings with unfair recall of at least 80%, since for consumer protection a missed unfair clause is worse than a false alarm. The gate un-flags 171 sentences: 149 false alarms, but also 22 truly unfair clauses (recall 92.2 to 82.6), a trade-off we discuss in the ethical analysis. Validation numbers of the gated system are optimistic because (k, m) was chosen on them; the test set gives the unbiased comparison.
 
+### Ablation: which knowledge helps? (validation)
+
+| Knowledge in the prompt | Macro-F1 | Unfair precision | Unfair recall | Flagged | False alarms | With evidence gate (k=8, m=3): macro-F1 / P / R |
+|---|---|---|---|---|---|---|
+| None (plain LLM) | 60.8 | 38.5 | 92.2 | 550 | 338 | – |
+| Legal only: rationales + provisions | 52.9 | 31.1 | 97.0 | 716 | 493 | – |
+| Examples only | 71.5 | 61.1 | 87.4 | 329 | 128 | 78.4 / 78.5 / 80.9 |
+| Examples + legal (full RAG) | 65.7 | 50.2 | 92.2 | 422 | 210 | 77.5 / 75.7 / 82.6 |
+
+```powershell
+.\.venv\Scripts\python scripts\run_rag.py --k-rationales 0 --max-provisions 0   # examples only
+.\.venv\Scripts\python scripts\run_rag.py --k-examples 0                        # legal knowledge only
+```
+
+The useful signal comes from the expert-labelled examples. Legal knowledge on its own makes the LLM flag even more sentences than with no retrieval (493 false alarms instead of 338, mostly limitation of liability and arbitration): reading descriptions of unfair clauses primes the model to find them everywhere. Added to the examples it still costs precision (210 false alarms instead of 128). But the legal knowledge is what grounds the explanations in the law: in the full RAG, 95.5% of the unfair verdicts cite a specific rationale or provision (not only the general test of Article 3(1)), while without it an explanation can only point to similar sentences. After the evidence gate the two systems are within one point of macro-F1, well inside the confidence intervals. We therefore keep **full RAG + evidence gate** as the main system, declared before the test run because its explanations are grounded in the law, and report examples only + gate as a secondary system.
+
+Citations that do not match a retrieved item are rare: 0 in the full RAG, 2 with examples only (a category code written as an id, and one example id that was not retrieved), 3 with legal knowledge only (category codes written as ids).
+
 ## Notebooks
 
 | Notebook | Content |
@@ -200,7 +218,7 @@ The **evidence gate** turns this observation into a transparent rule: a category
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
-- [ ] Phase 4: RAG pipeline (done: retriever, kNN baseline, RAG with cited explanations, evidence gate, validation results; next: ablations and the final test run)
+- [ ] Phase 4: RAG pipeline (done: retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations on validation; next: the final test run)
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

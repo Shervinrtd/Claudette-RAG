@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claudette-rag"
+version = "0.1.0"
+description = "Explainable and fair detection of unfair clauses in Terms of Service with Retrieval-Augmented LLMs"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  { name = "Alireza Shahidiani", email = "alireza.shahidiani@studio.unibo.it" },
+  { name = "Kiana Alian", email = "kiana.alian@studio.unibo.it" },
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

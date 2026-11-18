@@ -15,17 +15,67 @@ Online Terms of Service (ToS) often contain clauses that are potentially unfair 
 
 ```
 .
+├── data/
+│   ├── raw/              # downloaded dataset (not tracked by git)
+│   └── processed/        # derived data (not tracked by git)
+├── notebooks/            # exploration and analysis notebooks
+├── scripts/              # entry-point scripts (download, training, evaluation)
+├── src/claudette_rag/    # project source code
 ├── report/               # LaTeX report (initial and final) and figures
-├── .gitignore
+├── requirements.txt      # Python dependencies
 └── README.md
 ```
 
-Code, data scripts and notebooks will be added phase by phase.
+## Setup
+
+Requires Python 3.10 or newer. Create a virtual environment in the project folder and install the dependencies:
+
+```powershell
+# Windows (PowerShell)
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+```
+
+```bash
+# Linux / macOS
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+```
+
+Optionally activate it (`.\.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on Linux/macOS) so that `python` points to the environment. In VS Code or Jupyter, select `.venv` as the interpreter/kernel.
+
+## Data
+
+We use the **UNFAIR-ToS** task of the LexGLUE benchmark (Chalkidis et al., 2022), which contains sentences from 50 online Terms of Service annotated by legal experts in the Claudette project (Lippi et al., 2019). Each sentence has zero or more labels among 8 categories of potentially unfair clauses; sentences without labels are considered fair.
+
+Download it into `data/raw/` with:
+
+```powershell
+.\.venv\Scripts\python scripts\download_data.py   # Windows
+```
+
+```bash
+.venv/bin/python scripts/download_data.py         # Linux / macOS
+```
+
+For the multilingual fairness experiment we also use the **multilingual Claudette corpus** (Drawzeski et al., 2021): 25 Terms of Service annotated by legal experts in English, German, Italian and Polish, with an unfairness level per sentence (clearly fair / potentially unfair / clearly unfair). License: CC BY-NC 2.5 (non-commercial use). Download it and build the evaluation set (companies that overlap with UNFAIR-ToS are excluded to avoid data leakage):
+
+```powershell
+.\.venv\Scripts\python scripts\download_multilingual.py
+.\.venv\Scripts\python scripts\prepare_multilingual_eval.py
+```
+
+## Notebooks
+
+| Notebook | Content |
+|---|---|
+| `notebooks/01_data_exploration.ipynb` | UNFAIR-ToS: class imbalance, categories, multi-label, lengths, leakage |
+| `notebooks/02_multilingual_exploration.ipynb` | Multilingual corpus: annotation per language, unfairness levels, overlap with UNFAIR-ToS, evaluation set |
 
 ## Status
 
 - [x] Phase 0: proposal and initial report
-- [ ] Phase 1: data download and exploration
+- [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [ ] Phase 2: legal knowledge base
 - [ ] Phase 3: baselines (BERT, LLM without retrieval)
 - [ ] Phase 4: RAG pipeline

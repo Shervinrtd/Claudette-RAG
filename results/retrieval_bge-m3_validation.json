@@ -1,0 +1,36 @@
+{
+  "embedder": "BAAI/bge-m3",
+  "split": "validation",
+  "quality_at_k": {
+    "1": {
+      "example_hit": 0.7260869565217392,
+      "rationale_hit": 0.7869565217391304,
+      "fair_purity": 0.9594132029339854
+    },
+    "3": {
+      "example_hit": 0.908695652173913,
+      "rationale_hit": 0.9434782608695652,
+      "fair_purity": 0.9422982885085575
+    },
+    "5": {
+      "example_hit": 0.9478260869565217,
+      "rationale_hit": 0.9652173913043478,
+      "fair_purity": 0.936723716381418
+    },
+    "8": {
+      "example_hit": 0.9739130434782609,
+      "rationale_hit": 0.9782608695652174,
+      "fair_purity": 0.9273227383863081
+    },
+    "10": {
+      "example_hit": 0.9739130434782609,
+      "rationale_hit": 0.9782608695652174,
+      "fair_purity": 0.9229828850855746
+    }
+  },
+  "knn_choice": {
+    "k": 3,
+    "t": 2,
+    "validation_macro_f1": 0.7597032533637589
+  }
+}

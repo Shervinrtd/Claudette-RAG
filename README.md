@@ -108,6 +108,7 @@ Every system writes its predictions in the same format, one JSON object per line
 |---|---|---|---|---|
 | Always "fair" | 88.9 | 10.5 | 0.0 | 0.0 |
 | TF-IDF + linear SVM (ours) | 95.4 | 78.6 | 91.5 | 69.2 |
+| kNN vote over retrieved training sentences, bge-m3, k=3, t=2 (ours) | 94.8 | 77.8 | 78.0 | 82.6 |
 | Plain LLM: gpt-4.1-mini, zero-shot, no retrieval (ours) | 84.0 | 64.2 | 41.3 | 93.6 |
 | Legal-BERT fine-tuned, mean ± std over 3 seeds (ours) | 95.9 ± 0.4 | 82.7 ± 1.1 | 85.7 ± 4.4 | 82.0 ± 3.5 |
 | TF-IDF + SVM, as reported by LexGLUE | 94.7 | 75.0 | – | – |
@@ -132,6 +133,34 @@ The fine-tuned encoder baseline (Legal-BERT by default, 3 seeds, early stopping 
 .\.venv\Scripts\python scripts\train_bert.py --model bert-base-uncased          # plain BERT
 ```
 
+## Retrieval (Phase 4)
+
+For each sentence to classify, the retriever (`src/claudette_rag/retrieval.py`) finds in the knowledge base:
+
+- the **8 most similar training sentences** with their gold labels (fair and unfair), as worked examples;
+- the **5 most similar legal rationales** (why a kind of clause is or is not unfair);
+- the **legal provisions** those rationales are based on (at most 6), so every explanation can cite the law.
+
+Sentences and documents are embedded with the multilingual model **BAAI/bge-m3** (the same index serves the German, Italian and Polish experiment of Phase 6) and searched with exact cosine similarity, which is fast enough for 5,584 documents without a vector database. Build the index once (downloads about 2.3 GB the first time; a few minutes on the GPU), then measure retrieval quality on the validation set:
+
+```powershell
+.\.venv\Scripts\python scripts\build_index.py        # -> data/processed/index/bge-m3/
+.\.venv\Scripts\python scripts\eval_retrieval.py     # hit@k, purity, kNN baseline
+```
+
+`eval_retrieval.py` reports, for k = 1 to 10, how often at least one retrieved example (or rationale) has the category of an unfair sentence, and how clean the examples retrieved for fair sentences are. It also scores a **kNN baseline** that needs no LLM: a category is predicted when at least t of the k nearest training sentences have it, with k and t chosen on validation and scored once on test.
+
+Retrieval quality with bge-m3 on the validation set (230 unfair and 2,045 fair sentences):
+
+| k | Example hit@k | Rationale hit@k | Fair purity@k |
+|---|---|---|---|
+| 1 | 72.6 | 78.7 | 95.9 |
+| 3 | 90.9 | 94.3 | 94.2 |
+| 5 | 94.8 | 96.5 | 93.7 |
+| 8 | 97.4 | 97.8 | 92.7 |
+
+With 8 examples and 5 rationales, 97% of the unfair sentences receive at least one example and one rationale of their own category, so the evidence the LLM needs is almost always in its context. For fair sentences about 93% of the retrieved examples are fair, which gives the LLM evidence against false alarms. The retrieved examples alone already carry a strong signal: the kNN vote (k=3, t=2), with no training and no LLM, scores 77.8 macro-F1 on test, close to TF-IDF+SVM, with the recall of Legal-BERT (82.6). Its weak point is arbitration (precision 46.7), the same category where the plain LLM raises most false alarms: sentences of an arbitration section look alike, whether they are unfair or not.
+
 ## Notebooks
 
 | Notebook | Content |
@@ -145,7 +174,7 @@ The fine-tuned encoder baseline (Legal-BERT by default, 3 seeds, early stopping 
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
-- [ ] Phase 4: RAG pipeline
+- [ ] Phase 4: RAG pipeline (done: retriever, index, retrieval evaluation, kNN baseline; next: RAG prompt with citations)
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

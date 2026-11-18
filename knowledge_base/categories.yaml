@@ -1,0 +1,173 @@
+# One card per unfairness category (the 8 categories of UNFAIR-ToS).
+# label_index = position of the label in data/raw/metadata.json.
+# levels: criteria from the Claudette annotation scheme (lippi2019); null = level not used for
+# this category in the annotation guidelines.
+
+- id: ltd
+  label_index: 0
+  name: Limitation of liability
+  definition: >-
+    Clauses that limit or exclude the provider's duty to pay damages for certain losses or under
+    certain conditions.
+  levels:
+    clearly_fair: >-
+      The clause explicitly confirms the liabilities that cannot be excluded, such as liability for
+      intentional breach, gross negligence, death or personal injury, or product liability.
+    potentially_unfair: >-
+      The clause excludes or limits liability for broad categories of losses or causes (for example
+      malware, data loss, suspension or unavailability of the service), or uses a blanket phrase
+      such as "to the fullest extent permitted by law".
+    clearly_unfair: >-
+      The clause reduces, limits or excludes liability for physical injury, intentional damage or
+      gross negligence.
+  why_it_matters: >-
+    If something goes wrong (lost data, a security breach, a service that stops working), the
+    consumer may be left without any compensation, while the provider, who controls the service,
+    carries no risk. Blanket phrases also make it impossible for the consumer to understand what is
+    actually excluded.
+  legal_basis: [dir93.art3.1, dir93.annex.1a, dir93.annex.1b, dir93.art5]
+  source: lippi2019
+
+- id: ter
+  label_index: 1
+  name: Unilateral termination
+  definition: >-
+    Clauses that give the provider the right to suspend and/or terminate the service and/or the
+    contract, sometimes listing the circumstances in which this can happen.
+  levels:
+    clearly_fair: null
+    potentially_unfair: >-
+      The clause allows suspension or termination and specifies the reasons for it.
+    clearly_unfair: >-
+      The clause allows suspension or termination at any time, for any reason or no reason, and/or
+      without notice.
+  why_it_matters: >-
+    The consumer can suddenly lose access to an account, to paid content or to data built up over
+    years, with no warning and no way to object, while usually not having an equivalent right
+    against the provider.
+  legal_basis: [dir93.art3.1, dir93.annex.1f, dir93.annex.1g, dir93.annex.1c]
+  source: lippi2019
+
+- id: ch
+  label_index: 2
+  name: Unilateral change
+  definition: >-
+    Clauses that specify the conditions under which the provider can amend and modify the terms of
+    service and/or the service itself.
+  levels:
+    clearly_fair: null
+    potentially_unfair: >-
+      Always potentially unfair according to the Claudette guidelines: the Court of Justice has not
+      ruled on these clauses yet, but the Annex of the Directive supports this qualification.
+    clearly_unfair: null
+  why_it_matters: >-
+    The consumer agrees to one contract but can end up bound by a different one, often without
+    being told and without a valid reason, which undermines the very idea of an agreement between
+    two parties.
+  legal_basis: [dir93.annex.1j, dir93.annex.1k, dir93.annex.1c, dir93.art3.1]
+  source: lippi2019
+  note: >-
+    The later multilingual corpus (drawzeski2021) marks some changes made at any time without
+    notice as clearly unfair; we keep "potentially unfair" as the default level, following the
+    original guidelines.
+
+- id: cr
+  label_index: 3
+  name: Content removal
+  definition: >-
+    Clauses that give the provider the right to modify or delete the user's content, including
+    in-app purchases, and sometimes specify the conditions for doing so.
+  levels:
+    clearly_fair: null
+    potentially_unfair: >-
+      The clause specifies the conditions under which content can be removed.
+    clearly_unfair: >-
+      The clause allows removal at the provider's full discretion, and/or at any time for any or no
+      reason, and/or without notice or any possibility to retrieve the content.
+  why_it_matters: >-
+    Users can lose content they created or paid for (posts, photos, purchased items) without
+    knowing why and without being able to get it back.
+  legal_basis: [dir93.art3.1, dir93.annex.1k, dir93.annex.1m, dir93.annex.1c]
+  source: lippi2019
+  note: >-
+    Lippi et al. (2019) give no specific legal provision for this category; the Annex points listed
+    are our own connection (provider changing the service, deciding alone what is acceptable).
+
+- id: use
+  label_index: 4
+  name: Contract by using
+  definition: >-
+    Clauses stating that the consumer is bound by the terms of service simply by using the service,
+    without being required to show that he or she has read and accepted them.
+  levels:
+    clearly_fair: null
+    potentially_unfair: >-
+      Always potentially unfair: there is a good argument that these clauses create an imbalance,
+      but the Court of Justice has never assessed a clause of this type.
+    clearly_unfair: null
+  why_it_matters: >-
+    Consent is supposed to be a conscious choice. If merely visiting a website or opening an app
+    counts as acceptance, the consumer is bound by terms he or she may never have seen.
+  legal_basis: [dir93.annex.1i, dir93.art3.1, dir93.art5]
+  source: lippi2019
+
+- id: law
+  label_index: 5
+  name: Choice of law
+  definition: >-
+    Clauses specifying which law governs the contract, and therefore which law will be applied to
+    decide any dispute.
+  levels:
+    clearly_fair: >-
+      The applicable law is the law of the consumer's country of residence (or the country where the
+      consumer obtained the service or app).
+    potentially_unfair: >-
+      In every other case. The assessment also depends on other conditions, such as the level of
+      protection the chosen law gives the consumer.
+    clearly_unfair: null
+  why_it_matters: >-
+    A clause naming a foreign law (for example the law of California) suggests to a European
+    consumer that he or she has no protection under his or her own law, which is not true: the
+    mandatory consumer rules of the consumer's country still apply.
+  legal_basis: [rome1.art6.2, cjeu.amazon, dir93.art5, dir93.art3.1]
+  source: lippi2019
+
+- id: j
+  label_index: 6
+  name: Jurisdiction
+  definition: >-
+    Clauses stating which courts have competence to decide disputes arising from the contract.
+  levels:
+    clearly_fair: >-
+      The consumer has the right to bring disputes to the courts of his or her place of residence.
+    potentially_unfair: null
+    clearly_unfair: >-
+      Any judicial proceeding must take place away from the consumer's residence (in a different
+      city or country), for example in the courts of the provider's home town.
+  why_it_matters: >-
+    Having to sue, or be sued, in a distant city or a foreign country makes going to court so
+    expensive and difficult that in practice the consumer gives up his or her rights.
+  legal_basis: [cjeu.oceano, brussels1a.art17-19, dir93.annex.1q, dir93.art3.1]
+  source: lippi2019
+
+- id: a
+  label_index: 7
+  name: Arbitration
+  definition: >-
+    Clauses requiring or allowing the parties to resolve disputes through arbitration (a private
+    decision-maker) before, or instead of, going to court. A kind of forum selection clause.
+  levels:
+    clearly_fair: >-
+      Arbitration is fully optional for the consumer.
+    potentially_unfair: >-
+      Arbitration is required or encouraged; in the original Claudette corpus all arbitration
+      clauses were marked potentially unfair.
+    clearly_unfair: >-
+      Arbitration must take place in a country other than the consumer's country of residence,
+      and/or the arbitrator decides on discretion rather than on the basis of the law.
+  why_it_matters: >-
+    Mandatory arbitration takes disputes away from public courts: the consumer may lose the
+    protection of procedural rules, the possibility of appeal or of collective action, and may have
+    to follow rules chosen by the provider.
+  legal_basis: [dir93.annex.1q, dir93.art3.1]
+  source: lippi2019

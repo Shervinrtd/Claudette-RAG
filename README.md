@@ -18,6 +18,7 @@ Online Terms of Service (ToS) often contain clauses that are potentially unfair 
 ├── data/
 │   ├── raw/              # downloaded dataset (not tracked by git)
 │   └── processed/        # derived data (not tracked by git)
+├── knowledge_base/       # legal knowledge base (YAML, written by hand)
 ├── notebooks/            # exploration and analysis notebooks
 ├── scripts/              # entry-point scripts (download, training, evaluation)
 ├── src/claudette_rag/    # project source code
@@ -65,6 +66,14 @@ For the multilingual fairness experiment we also use the **multilingual Claudett
 .\.venv\Scripts\python scripts\prepare_multilingual_eval.py
 ```
 
+## Knowledge base
+
+The legal knowledge base used by the RAG system is in `knowledge_base/` (see its README): legal provisions, one card per unfairness category, 89 legal rationales (adapted from Ruggeri et al., 2022, and written by us) and the training sentences as examples. Validate it and export it as documents with:
+
+```powershell
+.\.venv\Scripts\python scripts\build_knowledge_base.py
+```
+
 ## Notebooks
 
 | Notebook | Content |
@@ -76,7 +85,7 @@ For the multilingual fairness experiment we also use the **multilingual Claudett
 
 - [x] Phase 0: proposal and initial report
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
-- [ ] Phase 2: legal knowledge base
+- [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [ ] Phase 3: baselines (BERT, LLM without retrieval)
 - [ ] Phase 4: RAG pipeline
 - [ ] Phase 5: evaluation (robustness, explainability)

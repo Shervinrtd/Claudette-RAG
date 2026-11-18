@@ -1,0 +1,643 @@
+# Legal rationales: the specific practices that make a clause potentially or clearly unfair
+# (or, for some categories, clearly fair).
+#
+# - Categories a, ch, cr, ter, ltd: practices adapted (paraphrased) from the knowledge base of
+#   Ruggeri et al. (2022); `original_id` is the rationale name used in the paper.
+# - Categories use, law, j, and the clearly_fair entries: written by us from the sources listed.
+# - `level` follows the Claudette criteria in categories.yaml.
+# - `legal_basis` (optional) adds provisions to those of the category card.
+
+# ============================================================== a: Arbitration (ruggeri2022)
+- id: a.arb_obligatory
+  category: a
+  level: potentially_unfair
+  practice: All disputes must be resolved by an arbitrator instead of a court.
+  source: ruggeri2022
+  original_id: arb_obligatory
+
+- id: a.exceptions_apply
+  category: a
+  level: potentially_unfair
+  practice: Arbitration is mandatory, with some exceptions (for example small claims or intellectual property disputes that can still go to court).
+  source: ruggeri2022
+  original_id: exceptions_apply
+
+- id: a.extralegal_rules
+  category: a
+  level: potentially_unfair
+  practice: The consumer is bound to dispute-resolution rules that are not set by law, such as the internal rules of a private arbitration body chosen by the provider.
+  source: ruggeri2022
+  original_id: extralegal_rules
+
+- id: a.outside_domicile
+  category: a
+  level: clearly_unfair
+  practice: The arbitration takes place in a country other than the one where the consumer lives.
+  source: ruggeri2022
+  original_id: outside_domicile
+  legal_basis: [brussels1a.art17-19]
+
+- id: a.opt_out
+  category: a
+  level: potentially_unfair
+  practice: Arbitration is mandatory unless the consumer actively opts out, usually within a short deadline and following a specific procedure.
+  source: ruggeri2022
+  original_id: opt_out
+
+- id: a.unless_prohibited
+  category: a
+  level: potentially_unfair
+  practice: Arbitration is mandatory except where the applicable law forbids it, leaving the consumer to find out whether that is the case.
+  source: ruggeri2022
+  original_id: unless_prohibited
+
+- id: a.soft_redirect
+  category: a
+  level: potentially_unfair
+  practice: Disputes that cannot be settled informally may be sent to arbitration at the choice of either party, including the provider.
+  source: ruggeri2022
+  original_id: soft_redirect
+
+- id: a.consent_tos
+  category: a
+  level: potentially_unfair
+  practice: Simply accepting the terms of service is treated as agreement to the arbitration clause.
+  source: ruggeri2022
+  original_id: consent_tos
+  legal_basis: [dir93.annex.1i]
+
+- id: a.optional_for_consumer
+  category: a
+  level: clearly_fair
+  practice: Arbitration is offered as an option that the consumer is free to use or not; going to court remains possible.
+  source: lippi2019
+
+# ============================================================== ch: Unilateral change (ruggeri2022)
+- id: ch.anyreason
+  category: ch
+  level: potentially_unfair
+  practice: The provider may change the contract or the service for any reason, at its full discretion and at any time.
+  source: ruggeri2022
+  original_id: anyreason
+
+- id: ch.nowarning
+  category: ch
+  level: potentially_unfair
+  practice: Changes are made without any notice to the consumer.
+  source: ruggeri2022
+  original_id: nowarning
+
+- id: ch.justposted
+  category: ch
+  level: potentially_unfair
+  practice: How the consumer is informed is left to the provider, for example by simply publishing the new terms on its website.
+  source: ruggeri2022
+  original_id: justposted
+
+- id: ch.consresp
+  category: ch
+  level: potentially_unfair
+  practice: The consumer is made responsible for regularly checking the terms for updates.
+  source: ruggeri2022
+  original_id: consresp
+
+- id: ch.againsterms
+  category: ch
+  level: potentially_unfair
+  practice: The provider may change or limit the service for a consumer who, in its view, violated the terms.
+  source: ruggeri2022
+  original_id: againsterms
+
+- id: ch.lawchange
+  category: ch
+  level: potentially_unfair
+  practice: Changes are made to reflect changes in the law or regulations, with the provider deciding when this applies.
+  source: ruggeri2022
+  original_id: lawchange
+
+- id: ch.update
+  category: ch
+  level: potentially_unfair
+  practice: The provider keeps the flexibility to amend, update or even discontinue features of the service.
+  source: ruggeri2022
+  original_id: update
+
+# ============================================================== cr: Content removal (ruggeri2022)
+- id: cr.nonotice
+  category: cr
+  level: clearly_unfair
+  practice: User content can be removed without prior notice.
+  source: ruggeri2022
+  original_id: nonotice
+
+- id: cr.noretrieve
+  category: cr
+  level: clearly_unfair
+  practice: User content can be removed with no possibility for the user to retrieve it.
+  source: ruggeri2022
+  original_id: noretrieve
+
+- id: cr.fulldiscretion
+  category: cr
+  level: clearly_unfair
+  practice: User content can be removed for any reason, at the provider's full discretion.
+  source: ruggeri2022
+  original_id: fulldiscretion
+
+- id: cr.lawviolation
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed to comply with the law or when the provider suspects in good faith that it breaks the law, including intellectual property infringement.
+  source: ruggeri2022
+  original_id: lawviolation
+
+- id: cr.termviolation
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed if the provider believes that it violates the terms or the provider's policies.
+  source: ruggeri2022
+  original_id: termviolation
+
+- id: cr.objcontent
+  category: cr
+  level: potentially_unfair
+  practice: Content that the provider considers offensive, obscene, abusive, harmful or inaccurate can be removed.
+  source: ruggeri2022
+  original_id: objcontent
+  legal_basis: [dir93.annex.1m]
+
+- id: cr.comply
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed to comply with an order of a court, the police or a government authority.
+  source: ruggeri2022
+  original_id: comply
+
+- id: cr.serviceprotection
+  category: cr
+  level: potentially_unfair
+  practice: Content that could harm the provider, its services or other users can be removed.
+  source: ruggeri2022
+  original_id: serviceprotection
+
+- id: cr.criteriafailure
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed if it does not meet the provider's quality or eligibility criteria.
+  source: ruggeri2022
+  original_id: criteriafailure
+
+- id: cr.complaint
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed after complaints by other users.
+  source: ruggeri2022
+  original_id: complaint
+
+- id: cr.rating
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed because of poor ratings or reviews.
+  source: ruggeri2022
+  original_id: rating
+
+- id: cr.fraudprevention
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed to prevent fraud or illegal activity.
+  source: ruggeri2022
+  original_id: fraudprevention
+
+- id: cr.personalsafety
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed to protect someone's personal safety.
+  source: ruggeri2022
+  original_id: personalsafety
+
+- id: cr.liability
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed if it could expose the provider to liability.
+  source: ruggeri2022
+  original_id: liability
+
+- id: cr.tpright
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed if it violates the rights of third parties, such as trademarks.
+  source: ruggeri2022
+  original_id: tpright
+
+- id: cr.susp
+  category: cr
+  level: potentially_unfair
+  practice: Content is removed when the user's account is suspended or terminated.
+  source: ruggeri2022
+  original_id: susp
+
+- id: cr.inactive
+  category: cr
+  level: potentially_unfair
+  practice: Content can be removed because the user has been inactive for some time.
+  source: ruggeri2022
+  original_id: inactive
+
+# ============================================================== ter: Unilateral termination (ruggeri2022)
+- id: ter.any_reasons
+  category: ter
+  level: clearly_unfair
+  practice: The provider may terminate or suspend for any reason, without cause, or for reasons it does not specify.
+  source: ruggeri2022
+  original_id: any_reasons
+
+- id: ter.no_notice
+  category: ter
+  level: clearly_unfair
+  practice: The provider may terminate or suspend without notice or without a reasonable notice period.
+  source: ruggeri2022
+  original_id: no_notice
+
+- id: ter.no_grounds
+  category: ter
+  level: clearly_unfair
+  practice: The provider may terminate or suspend, but the clause does not say on which grounds.
+  source: ruggeri2022
+  original_id: no_grounds
+
+- id: ter.fraud_abuse_illegal
+  category: ter
+  level: potentially_unfair
+  practice: Termination for illegal, fraudulent, abusive or harmful behaviour, or for safety and fraud prevention.
+  source: ruggeri2022
+  original_id: fraud_abuse_illegal
+
+- id: ter.breach
+  category: ter
+  level: potentially_unfair
+  practice: Termination for breaking the terms or community rules, cheating, making unauthorised profits or interfering with other users.
+  source: ruggeri2022
+  original_id: breach
+
+- id: ter.misinfo
+  category: ter
+  level: potentially_unfair
+  practice: Termination because the information provided by the user is false, out of date or incomplete.
+  source: ruggeri2022
+  original_id: misinfo
+
+- id: ter.infring_tp_rights
+  category: ter
+  level: potentially_unfair
+  practice: Termination for infringing other people's rights, such as copyright, including for repeat infringers.
+  source: ruggeri2022
+  original_id: infring_tp_rights
+
+- id: ter.multiple
+  category: ter
+  level: potentially_unfair
+  practice: Termination for having more than one account, or for an account being used by several people.
+  source: ruggeri2022
+  original_id: multiple
+
+- id: ter.cred_security
+  category: ter
+  level: potentially_unfair
+  practice: Termination because the user did not keep login credentials safe, or after a security breach.
+  source: ruggeri2022
+  original_id: cred_security
+
+- id: ter.dormant
+  category: ter
+  level: potentially_unfair
+  practice: Termination of accounts that have been inactive for a certain period.
+  source: ruggeri2022
+  original_id: dormant
+
+- id: ter.user_bad_rep
+  category: ter
+  level: potentially_unfair
+  practice: Termination if the user does not keep a required reputation level (for example ratings).
+  source: ruggeri2022
+  original_id: user_bad_rep
+
+- id: ter.reference
+  category: ter
+  level: potentially_unfair
+  practice: The grounds for termination are not in the clause itself but in another document.
+  source: ruggeri2022
+  original_id: reference
+  legal_basis: [dir93.art5]
+
+- id: ter.content_violation
+  category: ter
+  level: potentially_unfair
+  practice: Termination because content posted by the user infringes rights or violates the terms.
+  source: ruggeri2022
+  original_id: content_violation
+
+- id: ter.payments
+  category: ter
+  level: potentially_unfair
+  practice: Termination for unpaid amounts or reversed payments, such as chargebacks.
+  source: ruggeri2022
+  original_id: payments
+
+- id: ter.gen_rights_violation
+  category: ter
+  level: potentially_unfair
+  practice: Termination for violating, in general terms, the rights of the provider or of others.
+  source: ruggeri2022
+  original_id: gen_rights_violation
+
+- id: ter.over_quota
+  category: ter
+  level: potentially_unfair
+  practice: Termination for exceeding time, storage or other usage limits.
+  source: ruggeri2022
+  original_id: over_quota
+
+- id: ter.insolvency
+  category: ter
+  level: potentially_unfair
+  practice: Termination if a party becomes insolvent or bankrupt or is placed under a receiver.
+  source: ruggeri2022
+  original_id: insolvency
+
+- id: ter.shutdown
+  category: ter
+  level: potentially_unfair
+  practice: Termination because the service is shut down or no longer available.
+  source: ruggeri2022
+  original_id: shutdown
+
+- id: ter.no_consent
+  category: ter
+  level: potentially_unfair
+  practice: Termination if the user does not give or withdraws consent, or objects to the terms or to their changes.
+  source: ruggeri2022
+  original_id: no_consent
+
+- id: ter.sex_of
+  category: ter
+  level: potentially_unfair
+  practice: Termination for being a registered sex offender or for sexual misconduct involving minors.
+  source: ruggeri2022
+  original_id: sex_of
+
+- id: ter.parole
+  category: ter
+  level: potentially_unfair
+  practice: Termination for violating parole or probation.
+  source: ruggeri2022
+  original_id: parole
+
+- id: ter.viability_eligibility
+  category: ter
+  level: potentially_unfair
+  practice: Termination if the service is no longer economically viable for the provider, or if the user is no longer eligible.
+  source: ruggeri2022
+  original_id: viability_eligibility
+
+- id: ter.dispute
+  category: ter
+  level: potentially_unfair
+  practice: Termination if the user has a dispute with the provider or with the owner of the service.
+  source: ruggeri2022
+  original_id: dispute
+
+- id: ter.legal_reasons
+  category: ter
+  level: potentially_unfair
+  practice: Termination for legal requirements, requests from authorities, or broadly stated legal reasons.
+  source: ruggeri2022
+  original_id: legal_reasons
+
+- id: ter.tech_reasons
+  category: ter
+  level: potentially_unfair
+  practice: Termination for broadly stated technical reasons.
+  source: ruggeri2022
+  original_id: tech_reasons
+
+- id: ter.force_majeure
+  category: ter
+  level: potentially_unfair
+  practice: Termination because of force majeure, acts of God or similar unforeseeable events.
+  source: ruggeri2022
+  original_id: force_majeure
+
+- id: ter.providers_exposure
+  category: ter
+  level: potentially_unfair
+  practice: Termination if the user's actions or content could create legal risk or reputational harm for the provider.
+  source: ruggeri2022
+  original_id: providers_exposure
+
+- id: ter.protect_rights
+  category: ter
+  level: potentially_unfair
+  practice: Termination to protect the rights or interests of the provider or of third parties.
+  source: ruggeri2022
+  original_id: protect_rights
+
+# ============================================================== ltd: Limitation of liability (ruggeri2022)
+- id: ltd.injury
+  category: ltd
+  level: clearly_unfair
+  practice: The provider excludes liability for intentional harm, physical or personal injury, emotional distress or death.
+  source: ruggeri2022
+  original_id: injury
+
+- id: ltd.grossnegligence
+  category: ltd
+  level: clearly_unfair
+  practice: The provider excludes liability even for its own gross negligence.
+  source: ruggeri2022
+  original_id: grossnegligence
+
+- id: ltd.extent
+  category: ltd
+  level: potentially_unfair
+  practice: The provider is not liable "to the fullest extent permitted by law", a blanket phrase that does not say what is excluded; users are made solely responsible for complying with the law.
+  source: ruggeri2022
+  original_id: extent
+  legal_basis: [dir93.art5]
+
+- id: ltd.gen
+  category: ltd
+  level: potentially_unfair
+  practice: A general, non-specific exclusion or limitation of liability.
+  source: ruggeri2022
+  original_id: gen
+
+- id: ltd.discontinuance
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for technical problems or for the suspension, modification, discontinuation or unavailability of the service.
+  source: ruggeri2022
+  original_id: discontinuance
+
+- id: ltd.compharm
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for damage to the user's devices or software caused by viruses or malware.
+  source: ruggeri2022
+  original_id: compharm
+
+- id: ltd.anydamage
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for special, direct, indirect, punitive, incidental or consequential damages.
+  source: ruggeri2022
+  original_id: anydamage
+
+- id: ltd.amount
+  category: ltd
+  level: potentially_unfair
+  practice: Compensation is capped at a fixed total amount, or the only remedy is to close the account.
+  source: ruggeri2022
+  original_id: amount
+
+- id: ltd.thirdparty
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for the actions, content or services of third parties or other users.
+  source: ruggeri2022
+  original_id: thirdparty
+
+- id: ltd.security
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for damage caused by security breaches or unauthorised access to data.
+  source: ruggeri2022
+  original_id: security
+
+- id: ltd.dataloss
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for the loss, corruption, disclosure or failure to store the user's data.
+  source: ruggeri2022
+  original_id: dataloss
+
+- id: ltd.reputation
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for damage to reputation or goodwill.
+  source: ruggeri2022
+  original_id: reputation
+
+- id: ltd.anyloss
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for any loss, or for broad categories of loss such as profits, business or goodwill.
+  source: ruggeri2022
+  original_id: anyloss
+
+- id: ltd.awareness
+  category: ltd
+  level: potentially_unfair
+  practice: No liability even if the provider knew or was told that the damage could happen.
+  source: ruggeri2022
+  original_id: awareness
+
+- id: ltd.contractfailure
+  category: ltd
+  level: potentially_unfair
+  practice: No liability if the provider fails to perform the contract, including unavailability or breach.
+  source: ruggeri2022
+  original_id: contractfailure
+  legal_basis: [dir93.annex.1b]
+
+- id: ltd.ecoloss
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for lost profits, income, opportunities, business, sales or revenue.
+  source: ruggeri2022
+  original_id: ecoloss
+
+- id: ltd.content
+  category: ltd
+  level: potentially_unfair
+  practice: No liability for content posted or processed by users, for inaccuracies, or for objectionable material.
+  source: ruggeri2022
+  original_id: content
+
+- id: ltd.liabtheories
+  category: ltd
+  level: potentially_unfair
+  practice: No liability under any legal theory, such as contract, tort, strict liability or product liability.
+  source: ruggeri2022
+  original_id: liabtheories
+
+- id: ltd.non_excludable_affirmed
+  category: ltd
+  level: clearly_fair
+  practice: The clause states that the provider's liability for fraud, intentional breach, gross negligence, death or personal injury, or under product liability law, is not excluded or limited.
+  source: lippi2019
+
+# ============================================================== use: Contract by using (ours)
+- id: use.by_access_or_use
+  category: use
+  level: potentially_unfair
+  practice: The consumer is bound by the terms simply by visiting the website, downloading the app or using the service, without an explicit act of acceptance.
+  source: lippi2019
+  legal_basis: [dir93.annex.1i]
+
+- id: use.continued_use_after_change
+  category: use
+  level: potentially_unfair
+  practice: Continuing to use the service after the terms have changed is treated as acceptance of the new terms.
+  source: lippi2019
+  legal_basis: [dir93.annex.1i, dir93.annex.1j]
+
+- id: use.incorporated_documents
+  category: use
+  level: potentially_unfair
+  practice: By using the service, the consumer is also bound by other documents (policies, guidelines, rules) that are incorporated into the terms by reference.
+  source: lagioia2026_slides
+  legal_basis: [dir93.annex.1i, dir93.art5]
+
+# ============================================================== law: Choice of law (ours)
+- id: law.provider_law
+  category: law
+  level: potentially_unfair
+  practice: The contract is governed by the law of the provider's country or state (for example California or Ireland) rather than the law of the consumer's country.
+  source: lippi2019
+  legal_basis: [rome1.art6.2]
+
+- id: law.hides_home_protection
+  category: law
+  level: potentially_unfair
+  practice: The clause names a single applicable law and does not tell the consumer that the mandatory consumer protection rules of his or her own country still apply.
+  source: cjeu_amazon
+  legal_basis: [cjeu.amazon, rome1.art6.2, dir93.art5]
+
+- id: law.consumer_country
+  category: law
+  level: clearly_fair
+  practice: The contract is governed by the law of the country where the consumer lives, or the clause states that the consumer keeps the protection of the mandatory rules of his or her country.
+  source: lippi2019
+  legal_basis: [rome1.art6.2]
+
+# ============================================================== j: Jurisdiction (ours)
+- id: j.provider_courts
+  category: j
+  level: clearly_unfair
+  practice: All disputes must be brought exclusively before the courts of the provider's home city, state or country (for example the courts of San Francisco County, California).
+  source: lippi2019
+  legal_basis: [cjeu.oceano, brussels1a.art17-19]
+
+- id: j.consumer_must_travel
+  category: j
+  level: clearly_unfair
+  practice: Any legal proceeding must take place in a city or country other than the one where the consumer lives, so the consumer cannot use his or her local courts.
+  source: lippi2019
+  legal_basis: [cjeu.oceano, brussels1a.art17-19]
+
+- id: j.consumer_residence
+  category: j
+  level: clearly_fair
+  practice: The consumer can bring disputes before the courts of the place where he or she lives (possibly in addition to other courts).
+  source: lippi2019
+  legal_basis: [brussels1a.art17-19]

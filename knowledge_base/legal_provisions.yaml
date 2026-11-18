@@ -1,0 +1,181 @@
+# Legal rules used to justify verdicts. Summaries are written in our own words;
+# `reference` gives the exact provision so that every statement can be checked
+# against the official text at `source` -> url.
+
+# ---------------------------------------------------------------- Directive 93/13/EEC
+- id: dir93.art3.1
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 3(1)"
+  title: General unfairness test
+  summary: >-
+    A standard term that was not individually negotiated is unfair if, contrary to the requirement
+    of good faith, it creates a significant imbalance between the rights and obligations of the
+    parties, to the detriment of the consumer.
+
+- id: dir93.art3.2
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 3(2)"
+  title: Pre-drafted terms are not negotiated
+  summary: >-
+    A term drafted in advance, whose content the consumer could not influence, is always considered
+    not individually negotiated. Online Terms of Service are the typical example: they are
+    take-it-or-leave-it contracts.
+
+- id: dir93.art3.3
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 3(3) and Annex"
+  title: Indicative list of unfair terms
+  summary: >-
+    The Annex of the Directive gives an indicative and non-exhaustive list of terms that may be
+    regarded as unfair (a "grey list"): a term on the list is not automatically unfair, but it is a
+    strong signal.
+
+- id: dir93.art4.1
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 4(1)"
+  title: Context of the assessment
+  summary: >-
+    Whether a term is unfair is judged taking into account the nature of the service, the
+    circumstances when the contract was concluded and the other terms of the contract. The same
+    words can therefore be fair in one contract and unfair in another.
+
+- id: dir93.art5
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 5"
+  title: Plain and intelligible language
+  summary: >-
+    Written terms must be drafted in plain, intelligible language. When the meaning of a term is
+    doubtful, the interpretation most favourable to the consumer prevails.
+
+- id: dir93.art6.1
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Article 6(1)"
+  title: Unfair terms do not bind the consumer
+  summary: >-
+    An unfair term is not binding on the consumer; the rest of the contract stays in force if it
+    can continue to exist without that term.
+
+- id: dir93.annex.1a
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(a)"
+  title: Liability for death or personal injury
+  summary: >-
+    Terms that exclude or limit the provider's legal liability if the consumer dies or suffers
+    personal injury because of an act or omission of the provider.
+
+- id: dir93.annex.1b
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(b)"
+  title: Limiting the consumer's rights when the provider does not perform
+  summary: >-
+    Terms that inappropriately exclude or limit the consumer's legal rights against the provider
+    when the provider does not perform the contract, or performs it badly.
+
+- id: dir93.annex.1c
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(c)"
+  title: Provider's performance depends only on its own will
+  summary: >-
+    Terms that bind the consumer while the provider's own performance depends on a condition that
+    only the provider controls.
+
+- id: dir93.annex.1f
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(f)"
+  title: Discretionary dissolution of the contract
+  summary: >-
+    Terms that let the provider end the contract at its discretion when the consumer does not have
+    the same right, or let the provider keep payments for services not yet supplied when the
+    provider itself ends the contract.
+
+- id: dir93.annex.1g
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(g)"
+  title: Termination without reasonable notice
+  summary: >-
+    Terms that let the provider terminate a contract of indefinite duration without reasonable
+    notice, unless there are serious grounds for doing so.
+
+- id: dir93.annex.1i
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(i)"
+  title: Terms the consumer had no real opportunity to read
+  summary: >-
+    Terms that irrevocably bind the consumer to conditions he or she had no real opportunity to
+    become acquainted with before the contract was concluded.
+
+- id: dir93.annex.1j
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(j)"
+  title: Unilateral change of the terms
+  summary: >-
+    Terms that let the provider change the terms of the contract on its own, without a valid
+    reason that is specified in the contract.
+
+- id: dir93.annex.1k
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(k)"
+  title: Unilateral change of the service
+  summary: >-
+    Terms that let the provider change the characteristics of the product or service on its own,
+    without a valid reason.
+
+- id: dir93.annex.1m
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(m)"
+  title: Provider decides alone what complies with the contract
+  summary: >-
+    Terms that give the provider the right to decide whether what is supplied conforms to the
+    contract, or the exclusive right to interpret any term of the contract.
+
+- id: dir93.annex.1q
+  source: dir93_13
+  reference: "Directive 93/13/EEC, Annex, point 1(q)"
+  title: Hindering legal action
+  summary: >-
+    Terms that exclude or hinder the consumer's right to take legal action or use other remedies,
+    in particular by requiring disputes to go exclusively to arbitration not covered by legal
+    provisions, unduly restricting the evidence available to the consumer, or shifting onto the
+    consumer a burden of proof that the law places on the provider.
+
+# ---------------------------------------------------------------- Brussels Ia and Rome I
+- id: brussels1a.art17-19
+  source: brussels_1a
+  reference: "Regulation (EU) No 1215/2012, Articles 17-19"
+  title: Courts competent for consumer contracts
+  summary: >-
+    A consumer can sue the provider either in the courts of the provider's country or in the courts
+    of the place where the consumer lives (Article 18(1)), and can be sued only in the courts of
+    his or her own domicile (Article 18(2)). A contract term can depart from these rules only in a
+    few cases, for example if it is agreed after the dispute has arisen or if it gives the consumer
+    additional courts to choose from (Article 19).
+
+- id: rome1.art6.2
+  source: rome_1
+  reference: "Regulation (EC) No 593/2008 (Rome I), Article 6(2)"
+  title: Choice of law cannot remove home-country protection
+  summary: >-
+    The parties to a consumer contract may choose the applicable law, but this choice cannot deprive
+    the consumer of the protection of the mandatory rules of the country where he or she habitually
+    lives.
+
+# ---------------------------------------------------------------- Case law
+- id: cjeu.oceano
+  source: cjeu_oceano
+  reference: "CJEU, Joined Cases C-240/98 to C-244/98, Océano Grupo Editorial (2000)"
+  title: Jurisdiction clause in favour of the seller's courts
+  summary: >-
+    A non-negotiated term giving exclusive jurisdiction to the courts of the place where the
+    seller has its principal place of business must be regarded as unfair: it obliges the consumer
+    to go to courts that may be far from home, making it harder or too costly to defend himself or
+    herself or to start proceedings.
+
+- id: cjeu.amazon
+  source: cjeu_amazon
+  reference: "CJEU, Case C-191/15, VKI v Amazon EU (2016)"
+  title: Choice-of-law clause hiding home-country protection
+  summary: >-
+    A non-negotiated term stating that the contract is governed by the law of the provider's
+    country is unfair if it misleads the consumer into thinking that only that law applies, without
+    informing him or her that the protective mandatory rules of the law of his or her own country
+    still apply (Rome I, Article 6(2)).

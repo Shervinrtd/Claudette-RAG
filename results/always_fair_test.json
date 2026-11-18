@@ -1,0 +1,116 @@
+{
+  "n_sentences": 1607,
+  "n_gold_unfair": 172,
+  "n_predicted_unfair": 0,
+  "headline": {
+    "lexglue_micro_f1": 0.8890954151177201,
+    "lexglue_macro_f1": 0.10482869457228432,
+    "macro_f1_unfair_categories": 0.0,
+    "binary_precision": 0.0,
+    "binary_recall": 0.0,
+    "binary_f1": 0.0
+  },
+  "binary_confusion": {
+    "true_positive": 0,
+    "false_positive": 0,
+    "false_negative": 172,
+    "true_negative": 1435
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 38,
+      "predicted": 0
+    },
+    "Unilateral termination": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 38,
+      "predicted": 0
+    },
+    "Unilateral change": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 38,
+      "predicted": 0
+    },
+    "Content removal": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 13,
+      "predicted": 0
+    },
+    "Contract by using": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 23,
+      "predicted": 0
+    },
+    "Choice of law": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 13,
+      "predicted": 0
+    },
+    "Jurisdiction": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 16,
+      "predicted": 0
+    },
+    "Arbitration": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 7,
+      "predicted": 0
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.8929682638456752,
+      "recall": 1.0,
+      "f1": 0.9434582511505588,
+      "support": 1435,
+      "predicted": 1607
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.8741039758703583,
+      0.9050883197008178
+    ],
+    "lexglue_macro_f1": [
+      0.10389514763272219,
+      0.1057476262955715
+    ],
+    "macro_f1_unfair_categories": [
+      0.0,
+      0.0
+    ],
+    "binary_precision": [
+      0.0,
+      0.0
+    ],
+    "binary_recall": [
+      0.0,
+      0.0
+    ],
+    "binary_f1": [
+      0.0,
+      0.0
+    ]
+  },
+  "run": {
+    "name": "always_fair_test",
+    "predictions": "results\\predictions\\always_fair_test.jsonl",
+    "dataset": "unfair_tos",
+    "split": "test"
+  }
+}

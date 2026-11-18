@@ -1,0 +1,129 @@
+{
+  "n_sentences": 1607,
+  "n_gold_unfair": 172,
+  "n_predicted_unfair": 390,
+  "headline": {
+    "lexglue_micro_f1": 0.8396051819864281,
+    "lexglue_macro_f1": 0.6422211226247914,
+    "macro_f1_unfair_categories": 0.6088109801474604,
+    "binary_precision": 0.4128205128205128,
+    "binary_recall": 0.936046511627907,
+    "binary_f1": 0.5729537366548043
+  },
+  "binary_confusion": {
+    "true_positive": 161,
+    "false_positive": 229,
+    "false_negative": 11,
+    "true_negative": 1206
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.2962962962962963,
+      "recall": 0.8421052631578947,
+      "f1": 0.4383561643835616,
+      "support": 38,
+      "predicted": 108
+    },
+    "Unilateral termination": {
+      "precision": 0.543859649122807,
+      "recall": 0.8157894736842105,
+      "f1": 0.6526315789473685,
+      "support": 38,
+      "predicted": 57
+    },
+    "Unilateral change": {
+      "precision": 0.4745762711864407,
+      "recall": 0.7368421052631579,
+      "f1": 0.577319587628866,
+      "support": 38,
+      "predicted": 59
+    },
+    "Content removal": {
+      "precision": 0.325,
+      "recall": 1.0,
+      "f1": 0.4905660377358491,
+      "support": 13,
+      "predicted": 40
+    },
+    "Contract by using": {
+      "precision": 0.64,
+      "recall": 0.6956521739130435,
+      "f1": 0.6666666666666666,
+      "support": 23,
+      "predicted": 25
+    },
+    "Choice of law": {
+      "precision": 0.9230769230769231,
+      "recall": 0.9230769230769231,
+      "f1": 0.9230769230769231,
+      "support": 13,
+      "predicted": 13
+    },
+    "Jurisdiction": {
+      "precision": 0.9411764705882353,
+      "recall": 1.0,
+      "f1": 0.9696969696969697,
+      "support": 16,
+      "predicted": 17
+    },
+    "Arbitration": {
+      "precision": 0.08235294117647059,
+      "recall": 1.0,
+      "f1": 0.15217391304347827,
+      "support": 7,
+      "predicted": 85
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9909613804437141,
+      "recall": 0.840418118466899,
+      "f1": 0.9095022624434389,
+      "support": 1435,
+      "predicted": 1217
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.821964937714266,
+      0.858287246527333
+    ],
+    "lexglue_macro_f1": [
+      0.5993616941027138,
+      0.6759416545500759
+    ],
+    "macro_f1_unfair_categories": [
+      0.561015231946501,
+      0.6461566576617104
+    ],
+    "binary_precision": [
+      0.36242913832199547,
+      0.4595613833000563
+    ],
+    "binary_recall": [
+      0.8957029933256928,
+      0.9702380952380952
+    ],
+    "binary_f1": [
+      0.5194805194805195,
+      0.6183166670026814
+    ]
+  },
+  "run": {
+    "name": "llm_zeroshot_gpt-4.1-mini-2025-04-14_test",
+    "system": "plain LLM (zero-shot, no retrieval)",
+    "model": "gpt-4.1-mini-2025-04-14",
+    "dataset": "unfair_tos",
+    "split": "test",
+    "language": null,
+    "sample": null,
+    "predictions": "results\\predictions\\llm_zeroshot_gpt-4.1-mini-2025-04-14_test.jsonl",
+    "log": "results\\llm_logs\\llm_zeroshot_gpt-4.1-mini-2025-04-14_test.jsonl"
+  },
+  "llm": {
+    "estimated_cost_usd": 0.8696,
+    "prompt_tokens": 1899524,
+    "cached_tokens": 33920,
+    "completion_tokens": 74974,
+    "inconsistent_answers": 0,
+    "parse_errors": 0
+  }
+}

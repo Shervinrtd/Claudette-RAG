@@ -10,7 +10,11 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+
+# Secrets: any .env variant (e.g. .env.txt saved by Notepad), except the template
 .env
+.env.*
+!.env.example
 
 # Jupyter
 .ipynb_checkpoints/

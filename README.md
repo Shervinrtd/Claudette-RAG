@@ -23,6 +23,8 @@ Online Terms of Service (ToS) often contain clauses that are potentially unfair 
 ├── scripts/              # entry-point scripts (download, training, evaluation)
 ├── src/claudette_rag/    # project source code
 ├── report/               # LaTeX report (initial and final) and figures
+├── results/              # predictions and evaluation reports of every system
+├── tests/                # unit tests (python -m pytest)
 ├── requirements.txt      # Python dependencies
 └── README.md
 ```
@@ -74,6 +76,40 @@ The legal knowledge base used by the RAG system is in `knowledge_base/` (see its
 .\.venv\Scripts\python scripts\build_knowledge_base.py
 ```
 
+## Evaluation
+
+Every system writes its predictions in the same format, one JSON object per line (`{"id": "test-17", "labels": [1, 3]}`, an empty list meaning *fair*), and is scored with the same code (`src/claudette_rag/evaluation.py`, tested in `tests/`):
+
+- **LexGLUE micro-F1 and macro-F1** ("8+1": an extra *fair* label is added, as in Chalkidis et al. 2022), so our numbers are comparable with published ones;
+- **macro-F1 over the 8 unfair categories**, and precision/recall/F1 per category with the number of gold examples;
+- **unfair-clause detection precision and recall** (any category vs fair): for consumer protection, a missed unfair clause (low recall) is worse than a false alarm;
+- **95% bootstrap confidence intervals**, because some categories have very few test examples.
+
+```powershell
+.\.venv\Scripts\python -m pytest                                   # run the tests
+.\.venv\Scripts\python scripts\baseline_tfidf.py                    # always-fair and TF-IDF+SVM baselines
+.\.venv\Scripts\python scripts\evaluate.py results\predictions\tfidf_svm_test.jsonl
+```
+
+## Results (UNFAIR-ToS test set)
+
+| System | LexGLUE micro-F1 | LexGLUE macro-F1 | Unfair precision | Unfair recall |
+|---|---|---|---|---|
+| Always "fair" | 88.9 | 10.5 | 0.0 | 0.0 |
+| TF-IDF + linear SVM (ours) | 95.4 | 78.6 | 91.5 | 69.2 |
+| Plain LLM: gpt-4.1-mini, zero-shot, no retrieval (ours) | 84.0 | 64.2 | 41.3 | 93.6 |
+| TF-IDF + SVM, as reported by LexGLUE | 94.7 | 75.0 | – | – |
+| Legal-BERT, as reported by LexGLUE | 96.0 | 83.0 | – | – |
+
+A system that never flags anything already reaches 88.9 micro-F1, because 89% of the sentences are fair: micro-F1 alone is misleading, so we always report macro-F1 and the recall of unfair clauses.
+
+The plain LLM catches almost every unfair clause (recall 93.6) but raises many false alarms (precision 41.3: 390 sentences flagged for 172 truly unfair). Most false alarms are sentences on the *topic* of an unfair clause, e.g. procedural sentences inside long arbitration sections (72 of the 77 arbitration false alarms are within ~50 sentences of a gold arbitration clause), some of which even protect the consumer. Cost of the full test run: about $0.87.
+
+```powershell
+.\.venv\Scripts\python scripts\run_llm.py --dry-run      # prompt and cost estimate, no API call
+.\.venv\Scripts\python scripts\run_llm.py                # plain LLM baseline on the test set
+```
+
 ## Notebooks
 
 | Notebook | Content |
@@ -86,7 +122,7 @@ The legal knowledge base used by the RAG system is in `knowledge_base/` (see its
 - [x] Phase 0: proposal and initial report
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
-- [ ] Phase 3: baselines (BERT, LLM without retrieval)
+- [ ] Phase 3: baselines (BERT, LLM without retrieval) — *in progress: evaluation code, always-fair, TF-IDF+SVM and plain LLM baselines done; BERT next*
 - [ ] Phase 4: RAG pipeline
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)

@@ -47,6 +47,17 @@ python3 -m venv .venv
 
 Optionally activate it (`.\.venv\Scripts\Activate.ps1` on Windows, `source .venv/bin/activate` on Linux/macOS) so that `python` points to the environment. In VS Code or Jupyter, select `.venv` as the interpreter/kernel.
 
+### GPU (for the BERT baseline)
+
+PyTorch must be installed with CUDA support from the PyTorch index (the default `pip install torch` on Windows is CPU-only). Check the CUDA version of your NVIDIA driver with `nvidia-smi` (top right, "CUDA Version") and choose a build that is **equal or lower**:
+
+```powershell
+nvidia-smi
+.\.venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cu130   # driver CUDA >= 13.0
+.\.venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cu126   # driver CUDA 12.6-12.9
+.\.venv\Scripts\python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+
 ## Data
 
 We use the **UNFAIR-ToS** task of the LexGLUE benchmark (Chalkidis et al., 2022), which contains sentences from 50 online Terms of Service annotated by legal experts in the Claudette project (Lippi et al., 2019). Each sentence has zero or more labels among 8 categories of potentially unfair clauses; sentences without labels are considered fair.
@@ -98,6 +109,7 @@ Every system writes its predictions in the same format, one JSON object per line
 | Always "fair" | 88.9 | 10.5 | 0.0 | 0.0 |
 | TF-IDF + linear SVM (ours) | 95.4 | 78.6 | 91.5 | 69.2 |
 | Plain LLM: gpt-4.1-mini, zero-shot, no retrieval (ours) | 84.0 | 64.2 | 41.3 | 93.6 |
+| Legal-BERT fine-tuned, mean ± std over 3 seeds (ours) | 95.9 ± 0.4 | 82.7 ± 1.1 | 85.7 ± 4.4 | 82.0 ± 3.5 |
 | TF-IDF + SVM, as reported by LexGLUE | 94.7 | 75.0 | – | – |
 | Legal-BERT, as reported by LexGLUE | 96.0 | 83.0 | – | – |
 
@@ -105,9 +117,19 @@ A system that never flags anything already reaches 88.9 micro-F1, because 89% of
 
 The plain LLM catches almost every unfair clause (recall 93.6) but raises many false alarms (precision 41.3: 390 sentences flagged for 172 truly unfair). Most false alarms are sentences on the *topic* of an unfair clause, e.g. procedural sentences inside long arbitration sections (72 of the 77 arbitration false alarms are within ~50 sentences of a gold arbitration clause), some of which even protect the consumer. Cost of the full test run: about $0.87.
 
+Fine-tuned Legal-BERT reproduces the published result (95.9 / 82.7 vs 96.0 / 83.0) and has the best balance between precision and recall, but it still misses about one unfair clause in five and gives no reason for its decisions. Each seed trains in 7-11 minutes on a laptop RTX 4050 (6 GB). The three baselines fail in different ways: TF-IDF misses many unfair clauses, the plain LLM raises many false alarms, and Legal-BERT is accurate but opaque. The RAG system (Phase 4) aims at LLM-level recall with fewer false alarms, and an explanation for every decision.
+
 ```powershell
 .\.venv\Scripts\python scripts\run_llm.py --dry-run      # prompt and cost estimate, no API call
 .\.venv\Scripts\python scripts\run_llm.py                # plain LLM baseline on the test set
+```
+
+The fine-tuned encoder baseline (Legal-BERT by default, 3 seeds, early stopping on validation macro-F1) runs on the GPU:
+
+```powershell
+.\.venv\Scripts\python scripts\train_bert.py --limit 300 --epochs 1 --seeds 1   # 1-minute smoke test
+.\.venv\Scripts\python scripts\train_bert.py                                    # Legal-BERT, seeds 1 2 3
+.\.venv\Scripts\python scripts\train_bert.py --model bert-base-uncased          # plain BERT
 ```
 
 ## Notebooks
@@ -122,7 +144,7 @@ The plain LLM catches almost every unfair clause (recall 93.6) but raises many f
 - [x] Phase 0: proposal and initial report
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
-- [ ] Phase 3: baselines (BERT, LLM without retrieval) — *in progress: evaluation code, always-fair, TF-IDF+SVM and plain LLM baselines done; BERT next*
+- [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
 - [ ] Phase 4: RAG pipeline
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)

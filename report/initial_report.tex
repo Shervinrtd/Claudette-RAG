@@ -1,0 +1,114 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue!50!black, citecolor=black}
+\setlist{itemsep=2pt, topsep=4pt}
+
+
+\newcommand{\todo}[1]{\textcolor{red}{[#1]}}
+
+\title{\textbf{Claudette-RAG: Explainable and Fair Detection of Unfair Clauses in Terms of Service with Retrieval-Augmented LLMs}\\[4pt]
+\large Initial Report -- Ethics in Artificial Intelligence}
+
+\author{
+\begin{tabular}{c}
+Alireza Shahidiani \\
+alireza.shahidiani@studio.unibo.it \\
+Matr. 0001154402
+\end{tabular}
+\and
+\begin{tabular}{c}
+Kiana Alian \\
+kiana.alian@studio.unibo.it \\
+Matr. 0001153711
+\end{tabular}
+}
+
+\date{University of Bologna -- Master in Artificial Intelligence \\ \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Online Terms of Service (ToS) often contain clauses that are potentially unfair to consumers under EU consumer law (Directive 93/13/EEC), such as unilateral termination, broad limitations of liability or consent by mere use of the service. Consumers rarely read these documents, and consumer organisations lack the resources to check them at scale. Systems such as Claudette have shown that potentially unfair clauses can be detected automatically, but a detector that only outputs a label cannot justify its decisions, which limits trust, contestability and transparency.
+
+This project designs, implements and evaluates a Retrieval-Augmented Generation (RAG) system that detects potentially unfair clauses and explains its decisions. Given a clause, the system retrieves relevant legal rationales and annotated example clauses from a structured legal knowledge base and uses a Large Language Model to produce a verdict, the unfairness category and an explanation grounded in the retrieved evidence. The system is compared with a fine-tuned BERT-based classifier and with an LLM without retrieval.
+
+The evaluation follows the Trustworthy AI perspective of the course: explainability (are explanations correct and grounded?), technical robustness (detection quality and hallucination rate) and, as an extension, fairness as non-discrimination across languages (do consumers reading non-English ToS receive the same level of protection?). The technical results are complemented by an ethical and legal analysis based on the AI Act, GDPR transparency principles, consumer protection law, and deontological and consequentialist ethics.
+\end{abstract}
+
+\section{Description}
+
+\subsection{Context and motivation}
+Claudette~\cite{lippi2019claudette} is a machine learning system that detects potentially unfair clauses in ToS, distinguishing several categories of unfairness (e.g., arbitration, jurisdiction, choice of law, limitation of liability, unilateral change, unilateral termination, content removal, contract by using). Legal experts, however, do not only recognise unfair clauses: they explain \emph{why} a clause is unfair by appealing to legal rationales and background knowledge. Previous work has explored injecting such knowledge into neural models through memory networks~\cite{ruggeri2022memory}. Retrieval-Augmented Generation~\cite{lewis2020rag} offers a modern way to ground the output of LLMs in an explicit, inspectable knowledge source, which makes it a natural candidate for explainable legal text analysis.
+
+\subsection{Goals}
+Goals are defined incrementally: core goals define the minimum scope of the project, while extensions will be pursued if time allows.
+
+\paragraph{Core goals}
+\begin{enumerate}[label=\textbf{G\arabic*.}]
+  \item \textbf{Legal knowledge base.} Build a structured knowledge base of category definitions, legal rationales and annotated example clauses, derived from the Claudette ToS corpus (publicly available as the UNFAIR-ToS task of LexGLUE~\cite{chalkidis2022lexglue}) and from the relevant legal sources.
+  \item \textbf{RAG system.} Implement a pipeline that, given a clause, retrieves relevant rationales and examples and uses an LLM to output (i) whether the clause is potentially unfair, (ii) its category, (iii) an explanation citing the retrieved evidence.
+  \item \textbf{Robustness evaluation.} Compare the RAG system with a fine-tuned BERT/Legal-BERT baseline and an LLM without retrieval, in terms of precision, recall and F1 (overall and per category), retrieval quality, faithfulness and hallucination rate of the explanations, and computational cost.
+  \item \textbf{Ethical and legal analysis.} Discuss the system with respect to the Trustworthy AI requirements~\cite{hleg2019}, the AI Act~\cite{aiact2024}, GDPR transparency principles and consumer protection law, and from deontological (Kantian) and consequentialist perspectives, including risks and limitations (e.g., over-reliance on wrong verdicts and the need for human oversight).
+\end{enumerate}
+
+\paragraph{Extensions}
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+  \item \textbf{Multilingual fairness.} Assess whether the system offers the same level of protection to consumers reading ToS in other languages (e.g., Italian, German), measure the performance gap across languages and compare mitigation strategies (e.g., translation of the input into English vs.\ multilingual retrieval).
+  \item \textbf{Demo interface.} A simple web application where a user can paste a clause and obtain the verdict, the explanation and the retrieved evidence.
+\end{enumerate}
+
+\subsection{Expected deliverables}
+\begin{itemize}
+  \item Source code in the provided GitLab repository (Python, with dependency and build management), including the knowledge base construction, the RAG pipeline, the baselines and the evaluation scripts, with instructions for reproducibility.
+  \item The structured legal knowledge base, with documented sources.
+  \item The final report (this document, progressively extended), describing design choices, experiments, results and the ethical and legal analysis.
+  \item (Extension) The demo application.
+\end{itemize}
+
+\subsection{Work organisation}
+\begin{itemize}
+  \item \textbf{Alireza Shahidiani:} legal knowledge base, RAG pipeline (retrieval, prompting, explanation generation), demo interface.
+  \item \textbf{Kiana Alian:} BERT and LLM baselines, evaluation framework, multilingual fairness analysis and mitigation.
+  \item \textbf{Both:} data preparation, ethical and legal analysis, final report.
+\end{itemize}
+
+\begin{thebibliography}{9}\small
+\bibitem{lippi2019claudette}
+M.~Lippi, P.~Pałka, G.~Contissa, F.~Lagioia, H.-W.~Micklitz, G.~Sartor, P.~Torroni.
+\newblock CLAUDETTE: an automated detector of potentially unfair clauses in online terms of service.
+\newblock \emph{Artificial Intelligence and Law}, 27, 2019.
+
+\bibitem{ruggeri2022memory}
+F.~Ruggeri, F.~Lagioia, M.~Lippi, P.~Torroni.
+\newblock Detecting and explaining unfairness in consumer contracts through memory networks.
+\newblock \emph{Artificial Intelligence and Law}, 30, 2022.
+
+\bibitem{lewis2020rag}
+P.~Lewis et al.
+\newblock Retrieval-augmented generation for knowledge-intensive NLP tasks.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2020.
+
+\bibitem{chalkidis2022lexglue}
+I.~Chalkidis et al.
+\newblock LexGLUE: A benchmark dataset for legal language understanding in English.
+\newblock In \emph{Proceedings of ACL}, 2022.
+
+\bibitem{hleg2019}
+High-Level Expert Group on Artificial Intelligence.
+\newblock \emph{Ethics Guidelines for Trustworthy AI}.
+\newblock European Commission, 2019.
+
+\bibitem{aiact2024}
+Regulation (EU) 2024/1689 of the European Parliament and of the Council (Artificial Intelligence Act), 2024.
+\end{thebibliography}
+
+\end{document}

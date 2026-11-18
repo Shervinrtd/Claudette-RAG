@@ -1,0 +1,45 @@
+# Data (downloaded or generated, never committed)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Models and caches
+models/
+*.pt
+*.bin
+*.safetensors
+.cache/
+
+# Compiled report and preview images (binary files are not tracked; the figure
+# PDFs in report/figures/ are kept because the LaTeX report includes them)
+report/*.pdf
+report/figures/*.png
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

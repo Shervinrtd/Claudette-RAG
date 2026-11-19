@@ -13,8 +13,8 @@ test set) and every category it assigns, the script checks what the explanation 
 - invented: a cited id that was not retrieved (hallucinated source).
 
 The checks are split by whether the category is correct according to the experts, to see whether
-wrong flags come with weaker evidence. They measure grounding, not correctness of the legal
-reasoning: that is the purpose of the human evaluation.
+wrong flags come with weaker evidence. They measure grounding, not the correctness of the legal
+reasoning, which would need a review by legal experts.
 
 Usage (from the project root):
     python scripts/explanation_quality.py

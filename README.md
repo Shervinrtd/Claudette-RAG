@@ -235,8 +235,6 @@ All analyses use the main system on the test set (175 flagged clauses, 187 flagg
 .\.venv\Scripts\python scripts\explanation_quality.py    # are the citations consistent with the verdict? (free)
 .\.venv\Scripts\python scripts\error_analysis.py         # error types, with neighbouring sentences (free)
 .\.venv\Scripts\python scripts\faithfulness.py           # evidence removal and stability tests (about $0.80)
-.\.venv\Scripts\python scripts\human_eval.py make        # rating forms for two annotators
-.\.venv\Scripts\python scripts\human_eval.py score       # agreement and quality, after both forms are filled in
 ```
 
 ### Grounding of the explanations (automatic)
@@ -262,7 +260,7 @@ The explanations are grounded: every flag cites legal sources, almost always con
   - 4 treat a reference to other policies ("you agree to our commerce terms") as *contract by using*.
   - 3 miss a legal condition: termination for the consumer's own non-payment, or arbitration limited to business users.
   - 2 are trivial mentions of a change.
-  - 9 look unfair under the knowledge-base criteria even though the experts labelled them fair, for example "content that violates any of ebay's policies may be deleted at ebay's discretion". These are possible annotation inconsistencies, to be checked by the human evaluation.
+  - 9 look unfair under the knowledge-base criteria even though the experts labelled them fair, for example "content that violates any of ebay's policies may be deleted at ebay's discretion". These are possible annotation inconsistencies.
 - **Missed clauses (28).**
   - 14 were found by the LLM but removed by the gate because they had few expert precedents. 5 of them exclude liability for third-party sites or content, and 2 bind the user to the privacy policy by mere use.
   - 2 were given the wrong category and then removed by the gate.
@@ -289,9 +287,9 @@ UNFAIR-ToS also contains duplicate sentences in the test set (e.g. test-612/616 
 - **The answers are stable.** The same prompt gives the same labels in 98.3% of the 300 repeats. The 5 differences are all borderline fair/unfair decisions, which shows that temperature 0 and a fixed seed do not make the API fully deterministic.
 - **Cost:** about $0.80.
 
-### Human evaluation
+### Limits of this evaluation
 
-`human_eval.py make` draws 60 answers of the main system (30 correct flags, 20 false alarms, 5 correct "fair" verdicts and 5 missed clauses, shuffled, without labels) and writes an Excel form per annotator. Each annotator first gives their own judgment of the sentence, then rates the explanation: does it describe the sentence correctly, is the legal reasoning correct, are the cited sources relevant, would it help a consumer. The two annotators work independently; `human_eval.py score` reports their agreement (Cohen's kappa), the quality by group, and whether the annotators agree with the experts, for example whether they consider the false alarms unfair. Results: to be added.
+The automatic checks show that the explanations are grounded (they cite retrieved legal sources consistent with the verdict, and never invent one) and faithful (the cited evidence really drives the decision). They do not show that the legal reasoning is correct: that would need a review of the explanations by legal experts, which is outside the scope of this project. Grounding and faithfulness are necessary for a trustworthy explanation, but not sufficient, as the convincingly cited false alarms above show.
 
 ## Notebooks
 
@@ -307,6 +305,6 @@ UNFAIR-ToS also contains duplicate sentences in the test set (e.g. test-612/616 
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
 - [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
-- [ ] Phase 5: evaluation of the explanations (done: grounding, error analysis, faithfulness, stability; next: human evaluation)
+- [x] Phase 5: evaluation of the explanations (grounding, error analysis, faithfulness, stability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

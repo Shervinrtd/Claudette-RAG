@@ -1,0 +1,36 @@
+{
+  "system": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+  "outcomes": {
+    "correct": 1404,
+    "missed clause": 28,
+    "correct unfair": 129,
+    "wrong category": 15,
+    "false alarm": 31
+  },
+  "types": {
+    "missed clause | removed by the gate": 14,
+    "wrong category | partly right": 11,
+    "false alarm | other false alarm": 25,
+    "missed clause | missed by the LLM": 12,
+    "false alarm | near miss (clause nearby)": 6,
+    "missed clause | LLM wrong category, removed by the gate": 2,
+    "wrong category | different category": 4
+  },
+  "list_items": {
+    "all": 1607,
+    "all_list": 138,
+    "missed clause_n": 28,
+    "missed clause_list": 0,
+    "wrong category_n": 15,
+    "wrong category_list": 0,
+    "false alarm_n": 31,
+    "false alarm_list": 0
+  },
+  "confusions": {
+    "Limitation of liability -> Unilateral termination": 2,
+    "Content removal -> Unilateral termination": 2,
+    "Unilateral change -> Unilateral termination": 1,
+    "Unilateral termination -> Unilateral change": 1,
+    "Unilateral termination -> Content removal": 1
+  }
+}

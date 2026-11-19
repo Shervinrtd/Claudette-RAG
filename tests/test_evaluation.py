@@ -96,3 +96,10 @@ def test_paired_bootstrap():
     never = np.zeros_like(y)                                  # a system that never flags anything
     better = paired_bootstrap(y, y.copy(), never, n_samples=200)["binary_recall"]
     assert better["difference"] == 1.0 and better["low"] > 0 and better["p_value"] < 0.05
+
+
+def test_mcnemar_exact():
+    from claudette_rag.evaluation import mcnemar_exact
+    assert mcnemar_exact(0, 0) == 1.0 and mcnemar_exact(5, 5) == 1.0
+    assert mcnemar_exact(10, 0) == pytest.approx(2 / 1024)                  # 10 discordant pairs, all one way
+    assert mcnemar_exact(52, 5) < 1e-9

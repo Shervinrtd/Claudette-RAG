@@ -227,6 +227,72 @@ The useful signal comes from the expert-labelled examples. Legal knowledge on it
 
 Citations that do not match a retrieved item are rare: 0 in the full RAG, 2 with examples only (a category code written as an id, and one example id that was not retrieved), 3 with legal knowledge only (category codes written as ids).
 
+## Evaluation of the explanations (Phase 5)
+
+All analyses use the main system on the test set (175 flagged clauses, 187 flagged categories).
+
+```powershell
+.\.venv\Scripts\python scripts\explanation_quality.py    # are the citations consistent with the verdict? (free)
+.\.venv\Scripts\python scripts\error_analysis.py         # error types, with neighbouring sentences (free)
+.\.venv\Scripts\python scripts\faithfulness.py           # evidence removal and stability tests (about $0.80)
+.\.venv\Scripts\python scripts\human_eval.py make        # rating forms for two annotators
+.\.venv\Scripts\python scripts\human_eval.py score       # agreement and quality, after both forms are filled in
+```
+
+### Grounding of the explanations (automatic)
+
+| For each flagged category, the explanation... | Correct category (145) | Wrong category (42) |
+|---|---|---|
+| cites a legal rationale or provision | 100% | 100% |
+| ... other than the general test of Article 3(1) | 96% | 95% |
+| cites legal evidence consistent with the category (a rationale of that category or a provision linked to it) | 95% | 81% |
+| cites an expert-labelled example with that category | 79% | 62% |
+| cites a "clearly fair" rationale to support an unfair verdict | 1% | 0% |
+| cites an id that was not retrieved | 0% | 0% |
+
+The explanations are grounded: every flag cites legal sources, almost always consistent with the category and never invented. But **grounding is not correctness**: wrong flags are justified almost as convincingly as correct ones. Without the gate the gap is even smaller: 87% of the wrong flags of the plain RAG cite legal evidence consistent with the category they claim, against 95% of the correct ones. What separates right from wrong is the expert precedents (76% vs 35% of flags cite a matching expert example), which is exactly what the evidence gate uses. A convincing legal explanation is therefore not a guarantee that the verdict is right: a risk of automation bias that we discuss in the ethical analysis.
+
+### Error analysis
+
+`error_analysis.py` classifies the 74 test sentences where the main system disagrees with the experts and writes them, with two sentences of context on each side, to `results/error_analysis_<system>.csv`. A first reading of all 74 errors gives these patterns (the `manual_type` column of the CSV is for checking them):
+
+- **False alarms (31).**
+  - 6 are near misses: the system flagged a sentence next to the expert-labelled clause of the same category (for example the list of reasons that follows a termination clause).
+  - 7 are summaries, procedural details or waivers inside an arbitration section ("please note that these terms contain a mandatory arbitration provision...").
+  - 4 treat a reference to other policies ("you agree to our commerce terms") as *contract by using*.
+  - 3 miss a legal condition: termination for the consumer's own non-payment, or arbitration limited to business users.
+  - 2 are trivial mentions of a change.
+  - 9 look unfair under the knowledge-base criteria even though the experts labelled them fair, for example "content that violates any of ebay's policies may be deleted at ebay's discretion". These are possible annotation inconsistencies, to be checked by the human evaluation.
+- **Missed clauses (28).**
+  - 14 were found by the LLM but removed by the gate because they had few expert precedents. 5 of them exclude liability for third-party sites or content, and 2 bind the user to the privacy policy by mere use.
+  - 2 were given the wrong category and then removed by the gate.
+  - 12 were judged fair by the LLM: 6 are clear errors, for example a one-year limit for bringing claims judged "common and generally accepted". 3 are notification sentences that belong to a unilateral-change clause. 3 are labelled unfair by the experts although the clause is mutual or favours the consumer: "you may terminate your duolingo account at any time", or Brazilian law for residents of Brazil.
+- **Wrong category (15).** Mostly *unilateral termination* versus *unilateral change* on sentences that let the provider "limit", "modify or discontinue" a service, where the two categories overlap.
+
+UNFAIR-ToS also contains duplicate sentences in the test set (e.g. test-612/616 and test-613/617).
+
+### Faithfulness and stability
+
+`faithfulness.py` sends again the prompt of every sentence the RAG judged unfair, without the items its explanation cites, and, as a control, without the same number of retrieved items of the same types that were not cited. If the citations are the real reasons of the decision, removing them must change the verdict much more often than the control. It also repeats 300 unchanged prompts to measure how stable the answers are.
+
+| Sentences judged unfair by the RAG (with citations) | Remove the cited items: verdict flips to fair | Remove as many uncited items (control) | Exact McNemar test |
+|---|---|---|---|
+| All (291) | 27.8% | 8.2% | p = 1e-12 |
+| Control with exactly the same mix of types (225) | 30.2% | 9.3% | p = 6e-11 |
+| Correct category (157) | 10.8% | 2.5% | p = 0.001 |
+| Wrong flag (134) | 47.8% | 14.9% | p = 1e-9 |
+
+- **The citations are faithful.** Removing the cited items changes the verdict three times more often than removing the same number of uncited items of the same types: the explanation points to evidence the decision really depends on.
+- **The citations are not the whole reason.** In 64% of the cases the labels survive the removal of their citations, because the model also reads the sentence itself.
+- **Correct flags are robust.** Only 10.8% flip without their citations: the model recognises these clauses largely on its own.
+- **Wrong flags depend on the evidence.** Half of them (64 of 134) disappear when their cited items are removed, and all 64 are fair for the experts. In these cases the retrieved evidence talked the model into a false alarm, the same priming effect seen in the legal-only ablation.
+- **The answers are stable.** The same prompt gives the same labels in 98.3% of the 300 repeats. The 5 differences are all borderline fair/unfair decisions, which shows that temperature 0 and a fixed seed do not make the API fully deterministic.
+- **Cost:** about $0.80.
+
+### Human evaluation
+
+`human_eval.py make` draws 60 answers of the main system (30 correct flags, 20 false alarms, 5 correct "fair" verdicts and 5 missed clauses, shuffled, without labels) and writes an Excel form per annotator. Each annotator first gives their own judgment of the sentence, then rates the explanation: does it describe the sentence correctly, is the legal reasoning correct, are the cited sources relevant, would it help a consumer. The two annotators work independently; `human_eval.py score` reports their agreement (Cohen's kappa), the quality by group, and whether the annotators agree with the experts, for example whether they consider the false alarms unfair. Results: to be added.
+
 ## Notebooks
 
 | Notebook | Content |
@@ -241,6 +307,6 @@ Citations that do not match a retrieved item are rare: 0 in the full RAG, 2 with
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
 - [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
-- [ ] Phase 5: evaluation (robustness, explainability)
+- [ ] Phase 5: evaluation of the explanations (done: grounding, error analysis, faithfulness, stability; next: human evaluation)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

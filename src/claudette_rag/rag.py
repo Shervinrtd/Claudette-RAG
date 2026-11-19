@@ -14,6 +14,8 @@ reuse it from its prompt cache; everything that changes per sentence is in the u
 
 from __future__ import annotations
 
+import random
+
 from .llm import build_system_prompt
 
 ANSWER_HEADER = "\n\nAnswer with a JSON object:\n"
@@ -98,3 +100,31 @@ def context_ids(context: dict) -> dict:
     return {"examples": [doc["id"] for doc, _ in context.get("examples", [])],
             "rationales": [doc["id"] for doc, _ in context.get("rationales", [])],
             "provisions": [doc["id"] for doc in context.get("provisions", [])]}
+
+
+TYPES = ("examples", "rationales", "provisions")
+
+
+def context_from_ids(retrieved: dict, docs: dict, drop=frozenset()) -> dict:
+    """Saved retrieved ids -> context in the format of retrieval.retrieve, without the ids in `drop`.
+
+    Rebuilds exactly the knowledge shown to the LLM (the similarity scores are not used in the prompt).
+    """
+    return {"examples": [(docs[i], 0.0) for i in retrieved["examples"] if i not in drop],
+            "rationales": [(docs[i], 0.0) for i in retrieved["rationales"] if i not in drop],
+            "provisions": [docs[i] for i in retrieved["provisions"] if i not in drop]}
+
+
+def matched_control(retrieved: dict, cited: set[str], rng: random.Random) -> tuple[set[str], bool]:
+    """Uncited items to remove for the faithfulness control: for each type, as many as were cited.
+
+    Returns the ids and whether the match was exact (False when too few uncited items of a type exist).
+    """
+    drop, matched = set(), True
+    for kind in TYPES:
+        n_cited = sum(i in cited for i in retrieved[kind])
+        uncited = [i for i in retrieved[kind] if i not in cited]
+        if n_cited > len(uncited):
+            matched = False
+        drop |= set(rng.sample(uncited, min(n_cited, len(uncited))))
+    return drop, matched

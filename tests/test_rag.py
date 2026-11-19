@@ -3,8 +3,10 @@
 import json
 
 from claudette_rag.llm import build_system_prompt, parse_answer, response_format
-from claudette_rag.rag import (build_rag_system_prompt, check_citations, context_ids, format_context,
-                               gate_by_neighbours, rag_messages)
+import random
+
+from claudette_rag.rag import (build_rag_system_prompt, check_citations, context_from_ids, context_ids,
+                               format_context, gate_by_neighbours, matched_control, rag_messages)
 
 CATEGORIES = [
     {"id": "ter", "name": "Unilateral termination", "definition": "Provider may terminate.",
@@ -81,3 +83,21 @@ def test_gate_keeps_only_categories_with_enough_precedents():
     assert gate_by_neighbours([1, 2, 7], neighbours, k=3, m=2) == [1]     # only the 3 nearest count
     assert gate_by_neighbours([1, 2], neighbours, k=5, m=4) == []
     assert gate_by_neighbours([], neighbours, k=5, m=1) == []
+
+
+def test_context_from_ids_rebuilds_the_prompt_and_removes_items():
+    docs = {d["id"]: d for d, _ in CONTEXT["examples"] + CONTEXT["rationales"]}
+    docs.update({d["id"]: d for d in CONTEXT["provisions"]})
+    rebuilt = context_from_ids(context_ids(CONTEXT), docs)
+    assert format_context(rebuilt) == format_context(CONTEXT)                 # same prompt text
+    without = context_from_ids(context_ids(CONTEXT), docs, drop={"ter.no_notice", "ex.train-1"})
+    assert context_ids(without) == {"examples": ["ex.train-2"], "rationales": [], "provisions": ["dir93.annex.1g"]}
+
+
+def test_matched_control_removes_uncited_items_of_the_same_types():
+    retrieved = {"examples": ["e1", "e2", "e3", "e4"], "rationales": ["r1", "r2"], "provisions": ["p1"]}
+    drop, matched = matched_control(retrieved, {"e1", "r1"}, random.Random(0))
+    assert matched and len(drop) == 2 and not drop & {"e1", "r1"}
+    assert len(drop & {"e2", "e3", "e4"}) == 1 and drop & {"r2"} == {"r2"}
+    drop, matched = matched_control(retrieved, {"r1", "r2", "p1"}, random.Random(0))
+    assert not matched and drop == set()                                        # nothing uncited left to remove

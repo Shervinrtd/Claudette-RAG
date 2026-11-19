@@ -1,0 +1,94 @@
+{
+  "explanations": "rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+  "predictions": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+  "counts": {
+    "flags": {
+      "all": 187,
+      "correct": 145,
+      "wrong": 42
+    },
+    "grounded": {
+      "all": 187,
+      "correct": 145,
+      "wrong": 42
+    },
+    "legal": {
+      "all": 187,
+      "correct": 145,
+      "wrong": 42
+    },
+    "specific_legal": {
+      "all": 179,
+      "correct": 139,
+      "wrong": 40
+    },
+    "consistent_any": {
+      "all": 185,
+      "correct": 145,
+      "wrong": 40
+    },
+    "consistent_rationale": {
+      "all": 154,
+      "correct": 123,
+      "wrong": 31
+    },
+    "consistent_provision": {
+      "all": 115,
+      "correct": 97,
+      "wrong": 18
+    },
+    "consistent_example": {
+      "all": 141,
+      "correct": 115,
+      "wrong": 26
+    },
+    "consistent_legal": {
+      "all": 172,
+      "correct": 138,
+      "wrong": 34
+    },
+    "contradiction": {
+      "all": 1,
+      "correct": 1,
+      "wrong": 0
+    },
+    "invented": {
+      "all": 0,
+      "correct": 0,
+      "wrong": 0
+    }
+  },
+  "unsupported_examples": [
+    {
+      "id": "test-127",
+      "category": "ch",
+      "gold": [
+        "Unilateral termination"
+      ],
+      "text": "academia.edu reserves the right , at its sole discretion , to discontinue or terminate the site and services and to terminate these terms , at any time and with",
+      "cited": [
+        "ex.train-244",
+        "ex.train-5260",
+        "dir93.art3.1",
+        "dir93.annex.1f",
+        "ter.no_notice",
+        "ter.any_reasons"
+      ]
+    },
+    {
+      "id": "test-1064",
+      "category": "ter",
+      "gold": [
+        "Unilateral change"
+      ],
+      "text": "as between you and uber , uber reserves the right to establish , remove and/or revise charges for any or all services or goods obtained through the use of the s",
+      "cited": [
+        "ch.anyreason",
+        "ch.update",
+        "dir93.annex.1j",
+        "dir93.annex.1k",
+        "dir93.art3.1"
+      ]
+    }
+  ]
+}

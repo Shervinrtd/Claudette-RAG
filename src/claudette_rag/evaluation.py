@@ -23,6 +23,7 @@ Metrics
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -225,3 +226,16 @@ def format_report(name: str, report: dict) -> str:
         lines.append(f"{label:<27}{100 * m['precision']:7.1f}{100 * m['recall']:7.1f}"
                      f"{100 * m['f1']:7.1f}{m['support']:9d}")
     return "\n".join(lines)
+
+
+def mcnemar_exact(b: int, c: int) -> float:
+    """Two-sided exact McNemar test for two paired conditions on the same items.
+
+    b: items where only the first condition gives the outcome, c: only the second. Under the null
+    hypothesis both are equally likely, so min(b, c) follows a binomial(b + c, 1/2).
+    """
+    n = b + c
+    if n == 0:
+        return 1.0
+    tail = sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2 ** n
+    return min(1.0, 2 * tail)

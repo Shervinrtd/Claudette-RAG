@@ -15,8 +15,9 @@ pytest>=8.0
 openai>=1.40
 python-dotenv>=1.0
 
-# BERT baseline (install PyTorch with GPU support separately first: see README)
+# BERT baseline and retrieval embeddings (install PyTorch with GPU support separately first: see README)
 transformers>=4.45
+sentence-transformers>=3.0
 
 # This project's own package (src/claudette_rag), installed in editable mode
 -e .

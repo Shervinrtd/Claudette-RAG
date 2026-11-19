@@ -108,8 +108,12 @@ Every system writes its predictions in the same format, one JSON object per line
 |---|---|---|---|---|
 | Always "fair" | 88.9 | 10.5 | 0.0 | 0.0 |
 | TF-IDF + linear SVM (ours) | 95.4 | 78.6 | 91.5 | 69.2 |
+| kNN vote over retrieved training sentences, bge-m3, k=3, t=2 (ours) | 94.8 | 77.8 | 78.0 | 82.6 |
 | Plain LLM: gpt-4.1-mini, zero-shot, no retrieval (ours) | 84.0 | 64.2 | 41.3 | 93.6 |
 | Legal-BERT fine-tuned, mean ± std over 3 seeds (ours) | 95.9 ± 0.4 | 82.7 ± 1.1 | 85.7 ± 4.4 | 82.0 ± 3.5 |
+| RAG: gpt-4.1-mini + examples + legal knowledge, no gate (ours) | 90.2 | 71.3 | 55.0 | 93.0 |
+| RAG examples only + evidence gate (ours, secondary) | 95.6 | 78.9 | 83.7 | 80.8 |
+| **RAG + evidence gate (ours, main system)** | **95.6** | **79.4** | **82.3** | **83.7** |
 | TF-IDF + SVM, as reported by LexGLUE | 94.7 | 75.0 | – | – |
 | Legal-BERT, as reported by LexGLUE | 96.0 | 83.0 | – | – |
 
@@ -118,6 +122,25 @@ A system that never flags anything already reaches 88.9 micro-F1, because 89% of
 The plain LLM catches almost every unfair clause (recall 93.6) but raises many false alarms (precision 41.3: 390 sentences flagged for 172 truly unfair). Most false alarms are sentences on the *topic* of an unfair clause, e.g. procedural sentences inside long arbitration sections (72 of the 77 arbitration false alarms are within ~50 sentences of a gold arbitration clause), some of which even protect the consumer. Cost of the full test run: about $0.87.
 
 Fine-tuned Legal-BERT reproduces the published result (95.9 / 82.7 vs 96.0 / 83.0) and has the best balance between precision and recall, but it still misses about one unfair clause in five and gives no reason for its decisions. Each seed trains in 7-11 minutes on a laptop RTX 4050 (6 GB). The three baselines fail in different ways: TF-IDF misses many unfair clauses, the plain LLM raises many false alarms, and Legal-BERT is accurate but opaque. The RAG system (Phase 4) aims at LLM-level recall with fewer false alarms, and an explanation for every decision.
+
+**Main system (Phase 4).** The RAG system with the evidence gate, with every choice made on validation and the test set used once, reaches 79.4 macro-F1 with 82.3 precision and 83.7 recall, without training the LLM. To know which differences are real, `scripts/compare_systems.py` runs a paired bootstrap (1,000 resamples of the same test sentences):
+
+| Main system minus... | Macro-F1 | Unfair precision | Unfair recall |
+|---|---|---|---|
+| Legal-BERT (seeds 1 / 2 / 3) | −2.5 / −4.6 / −2.8, none significant | +0.4 / −8.3* / −2.4 | −0.6 / +5.8 / 0.0 |
+| TF-IDF + SVM | +0.8 | −9.3* | **+14.5*** |
+| kNN vote | +1.6 | +4.3 | +1.2 |
+| Plain LLM | **+15.2*** | **+41.0*** | −9.9* |
+| RAG without the gate | **+8.1*** | **+27.3*** | −9.3* |
+| RAG examples only + gate | +0.5 | −1.4 | +2.9* |
+
+\* significant at 5% (the 95% interval of the difference does not contain 0).
+
+In accuracy, the main system is statistically on par with fine-tuned Legal-BERT, TF-IDF and the kNN vote: Legal-BERT keeps a lead of 2.5-4.6 macro-F1 points, which this test set (7 to 38 examples per category) cannot confirm. It is clearly better than the plain LLM and than RAG without the gate, and it finds 14.5 points more unfair clauses than TF-IDF. What it adds over all of them is the explanation: every flagged clause comes with a reason, 95.4% cite a specific legal rationale or provision (65.7% a specific article, Annex point or court case, such as Annex 1(j)-(k) of Directive 93/13 for unilateral changes or CJEU Océano for jurisdiction clauses), 77.7% cite the expert-labelled precedents they resemble, and no cited id was invented. The legal knowledge also adds recall over the examples-only system (+2.9, significant). Cost of the test run: $1.64 (main) and $1.29 (examples only).
+
+```powershell
+.\.venv\Scripts\python scripts\compare_systems.py      # paired bootstrap: main system vs every other system
+```
 
 ```powershell
 .\.venv\Scripts\python scripts\run_llm.py --dry-run      # prompt and cost estimate, no API call
@@ -132,6 +155,78 @@ The fine-tuned encoder baseline (Legal-BERT by default, 3 seeds, early stopping 
 .\.venv\Scripts\python scripts\train_bert.py --model bert-base-uncased          # plain BERT
 ```
 
+## Retrieval (Phase 4)
+
+For each sentence to classify, the retriever (`src/claudette_rag/retrieval.py`) finds in the knowledge base:
+
+- the **8 most similar training sentences** with their gold labels (fair and unfair), as worked examples;
+- the **5 most similar legal rationales** (why a kind of clause is or is not unfair);
+- the **legal provisions** those rationales are based on (at most 6), so every explanation can cite the law.
+
+Sentences and documents are embedded with the multilingual model **BAAI/bge-m3** (the same index serves the German, Italian and Polish experiment of Phase 6) and searched with exact cosine similarity, which is fast enough for 5,584 documents without a vector database. Build the index once (downloads about 2.3 GB the first time; a few minutes on the GPU), then measure retrieval quality on the validation set:
+
+```powershell
+.\.venv\Scripts\python scripts\build_index.py        # -> data/processed/index/bge-m3/
+.\.venv\Scripts\python scripts\eval_retrieval.py     # hit@k, purity, kNN baseline
+```
+
+`eval_retrieval.py` reports, for k = 1 to 10, how often at least one retrieved example (or rationale) has the category of an unfair sentence, and how clean the examples retrieved for fair sentences are. It also scores a **kNN baseline** that needs no LLM: a category is predicted when at least t of the k nearest training sentences have it, with k and t chosen on validation and scored once on test.
+
+Retrieval quality with bge-m3 on the validation set (230 unfair and 2,045 fair sentences):
+
+| k | Example hit@k | Rationale hit@k | Fair purity@k |
+|---|---|---|---|
+| 1 | 72.6 | 78.7 | 95.9 |
+| 3 | 90.9 | 94.3 | 94.2 |
+| 5 | 94.8 | 96.5 | 93.7 |
+| 8 | 97.4 | 97.8 | 92.7 |
+
+With 8 examples and 5 rationales, 97% of the unfair sentences receive at least one example and one rationale of their own category, so the evidence the LLM needs is almost always in its context. For fair sentences about 93% of the retrieved examples are fair, which gives the LLM evidence against false alarms. The retrieved examples alone already carry a strong signal: the kNN vote (k=3, t=2), with no training and no LLM, scores 77.8 macro-F1 on test, close to TF-IDF+SVM, with the recall of Legal-BERT (82.6). Its weak point is arbitration (precision 46.7), the same category where the plain LLM raises most false alarms: sentences of an arbitration section look alike, whether they are unfair or not.
+
+## RAG system (Phase 4)
+
+The RAG system (`src/claudette_rag/rag.py`, `scripts/run_rag.py`) uses the same model, settings, task description and category cards as the plain LLM baseline; the only difference is the retrieved knowledge in the prompt: before each sentence, the 8 most similar training sentences with their expert labels, 5 legal rationales and the linked legal provisions, each with an id. The answer must list in `cited_ids` the retrieved items the decision relies on, and the citations are checked against what was actually retrieved. Every answer is saved with its explanation, citations and retrieved ids in `results/explanations/`.
+
+All choices are made on the validation set; the test set is used once, at the end.
+
+```powershell
+.\.venv\Scripts\python scripts\run_rag.py --dry-run         # one real prompt and the cost estimate, no API call
+.\.venv\Scripts\python scripts\run_rag.py --sample 40       # 20 unfair + 20 fair validation sentences
+.\.venv\Scripts\python scripts\run_rag.py                   # full validation set (about $2.30, 30 minutes)
+.\.venv\Scripts\python scripts\gate_rag.py rag_gpt-4.1-mini-2025-04-14_e8r5p6_validation   # evidence gate, free
+```
+
+Results on the **validation** set (2,275 sentences, 230 unfair), gpt-4.1-mini:
+
+| System | LexGLUE micro-F1 | LexGLUE macro-F1 | Unfair precision | Unfair recall | Sentences flagged |
+|---|---|---|---|---|---|
+| Plain LLM (no retrieval) | 83.6 | 60.8 | 38.5 | 92.2 | 550 |
+| kNN vote (k=3, t=2), no LLM | 94.7 | 76.0 | 76.3 | 77.0 | 232 |
+| RAG | 88.9 | 65.7 | 50.2 | 92.2 | 422 |
+| RAG + evidence gate (k=8, m=3) | 94.9 | 77.5 | 75.7 | 82.6 | 251 |
+
+Retrieval helps the LLM: with the same recall, it removes 128 of the 338 false alarms of the plain LLM (arbitration precision rises from 9.0 to 20.5), and 99.8% of its unfair verdicts cite a retrieved rationale or provision, with no invented ids. But the LLM still flags many sentences on their topic and ignores the evidence: of the 210 fair sentences it flags, 132 have at least 6 of their 8 most similar sentences labelled fair by the experts, and 44 have all 8.
+
+The **evidence gate** turns this observation into a transparent rule: a category proposed by the LLM is kept only if at least m of the k most similar expert-labelled sentences have it, so that every flagged clause has both a legal explanation and precedents. (k, m) was chosen on validation by a rule fixed in advance: the best macro-F1 among the settings with unfair recall of at least 80%, since for consumer protection a missed unfair clause is worse than a false alarm. The gate un-flags 171 sentences: 149 false alarms, but also 22 truly unfair clauses (recall 92.2 to 82.6), a trade-off we discuss in the ethical analysis. Validation numbers of the gated system are optimistic because (k, m) was chosen on them; the test set gives the unbiased comparison.
+
+### Ablation: which knowledge helps? (validation)
+
+| Knowledge in the prompt | Macro-F1 | Unfair precision | Unfair recall | Flagged | False alarms | With evidence gate (k=8, m=3): macro-F1 / P / R |
+|---|---|---|---|---|---|---|
+| None (plain LLM) | 60.8 | 38.5 | 92.2 | 550 | 338 | – |
+| Legal only: rationales + provisions | 52.9 | 31.1 | 97.0 | 716 | 493 | – |
+| Examples only | 71.5 | 61.1 | 87.4 | 329 | 128 | 78.4 / 78.5 / 80.9 |
+| Examples + legal (full RAG) | 65.7 | 50.2 | 92.2 | 422 | 210 | 77.5 / 75.7 / 82.6 |
+
+```powershell
+.\.venv\Scripts\python scripts\run_rag.py --k-rationales 0 --max-provisions 0   # examples only
+.\.venv\Scripts\python scripts\run_rag.py --k-examples 0                        # legal knowledge only
+```
+
+The useful signal comes from the expert-labelled examples. Legal knowledge on its own makes the LLM flag even more sentences than with no retrieval (493 false alarms instead of 338, mostly limitation of liability and arbitration): reading descriptions of unfair clauses primes the model to find them everywhere. Added to the examples it still costs precision (210 false alarms instead of 128). But the legal knowledge is what grounds the explanations in the law: in the full RAG, 95.5% of the unfair verdicts cite a specific rationale or provision (not only the general test of Article 3(1)), while without it an explanation can only point to similar sentences. After the evidence gate the two systems are within one point of macro-F1, well inside the confidence intervals. We therefore keep **full RAG + evidence gate** as the main system, declared before the test run because its explanations are grounded in the law, and report examples only + gate as a secondary system.
+
+Citations that do not match a retrieved item are rare: 0 in the full RAG, 2 with examples only (a category code written as an id, and one example id that was not retrieved), 3 with legal knowledge only (category codes written as ids).
+
 ## Notebooks
 
 | Notebook | Content |
@@ -145,7 +240,7 @@ The fine-tuned encoder baseline (Legal-BERT by default, 3 seeds, early stopping 
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
-- [ ] Phase 4: RAG pipeline
+- [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

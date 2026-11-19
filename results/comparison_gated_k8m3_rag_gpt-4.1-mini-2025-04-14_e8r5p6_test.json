@@ -1,0 +1,182 @@
+{
+  "reference": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+  "n_bootstrap": 1000,
+  "reference_scores": {
+    "lexglue_micro_f1": 0.9561728395061728,
+    "lexglue_macro_f1": 0.7941367489379704,
+    "macro_f1_unfair_categories": 0.7709762178604137,
+    "binary_precision": 0.8228571428571428,
+    "binary_recall": 0.8372093023255814,
+    "binary_f1": 0.829971181556196
+  },
+  "comparisons": {
+    "Legal-BERT seed 1": {
+      "predictions": "bert_legal-bert-base-uncased_seed1_test",
+      "lexglue_macro_f1": {
+        "difference": -0.025158523267273858,
+        "low": -0.0754190005740884,
+        "high": 0.023966132764341765,
+        "p_value": 0.3
+      },
+      "binary_precision": {
+        "difference": 0.003648103309120243,
+        "low": -0.05626305851849056,
+        "high": 0.06386127177850344,
+        "p_value": 0.866
+      },
+      "binary_recall": {
+        "difference": -0.005813953488372103,
+        "low": -0.056254006410256435,
+        "high": 0.05229618163054699,
+        "p_value": 0.964
+      }
+    },
+    "Legal-BERT seed 2": {
+      "predictions": "bert_legal-bert-base-uncased_seed2_test",
+      "lexglue_macro_f1": {
+        "difference": -0.04620276153630842,
+        "low": -0.0980341398045867,
+        "high": 0.008430407667504608,
+        "p_value": 0.07
+      },
+      "binary_precision": {
+        "difference": -0.08254826254826253,
+        "low": -0.13926992185898954,
+        "high": -0.03288545798155605,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": 0.05813953488372092,
+        "low": 0.0,
+        "high": 0.11111111111111116,
+        "p_value": 0.056
+      }
+    },
+    "Legal-BERT seed 3": {
+      "predictions": "bert_legal-bert-base-uncased_seed3_test",
+      "lexglue_macro_f1": {
+        "difference": -0.027695398493062795,
+        "low": -0.07743693384337931,
+        "high": 0.024313115951566266,
+        "p_value": 0.296
+      },
+      "binary_precision": {
+        "difference": -0.02420168067226891,
+        "low": -0.08330386171771721,
+        "high": 0.029639613590484434,
+        "p_value": 0.378
+      },
+      "binary_recall": {
+        "difference": 0.0,
+        "low": -0.05684934017595314,
+        "high": 0.05666520553282669,
+        "p_value": 1.0
+      }
+    },
+    "TF-IDF + SVM": {
+      "predictions": "tfidf_svm_test",
+      "lexglue_macro_f1": {
+        "difference": 0.007866912440910312,
+        "low": -0.06331580172560493,
+        "high": 0.08281704132496917,
+        "p_value": 0.828
+      },
+      "binary_precision": {
+        "difference": -0.09252747252747251,
+        "low": -0.1477274464831804,
+        "high": -0.04061342888657365,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": 0.14534883720930236,
+        "low": 0.07601935874168184,
+        "high": 0.21936229722170428,
+        "p_value": 0.0
+      }
+    },
+    "kNN vote (bge-m3)": {
+      "predictions": "knn_bge-m3_test",
+      "lexglue_macro_f1": {
+        "difference": 0.015738019464406117,
+        "low": -0.02291777351836833,
+        "high": 0.05554189562545528,
+        "p_value": 0.488
+      },
+      "binary_precision": {
+        "difference": 0.04263736263736262,
+        "low": -0.0030735864206049594,
+        "high": 0.08531738819071966,
+        "p_value": 0.07
+      },
+      "binary_recall": {
+        "difference": 0.011627906976744207,
+        "low": -0.031254090314136125,
+        "high": 0.055931677018633615,
+        "p_value": 0.66
+      }
+    },
+    "Plain LLM": {
+      "predictions": "llm_zeroshot_gpt-4.1-mini-2025-04-14_test",
+      "lexglue_macro_f1": {
+        "difference": 0.151915626313179,
+        "low": 0.0975131877294898,
+        "high": 0.2019590317698496,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.41003663003663005,
+        "low": 0.3542525835325502,
+        "high": 0.4620078861907454,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.09883720930232553,
+        "low": -0.14724417964448644,
+        "high": -0.048375024145257836,
+        "p_value": 0.0
+      }
+    },
+    "RAG full, no gate": {
+      "predictions": "rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": 0.08106806014631118,
+        "low": 0.03509125772604105,
+        "high": 0.12137233627332729,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.2730289641629847,
+        "low": 0.2224495373470929,
+        "high": 0.31796151409566037,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.09302325581395343,
+        "low": -0.13774055662260393,
+        "high": -0.051609345351043556,
+        "p_value": 0.0
+      }
+    },
+    "RAG examples only + gate": {
+      "predictions": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r0p0_test",
+      "lexglue_macro_f1": {
+        "difference": 0.0049042592869864565,
+        "low": -0.011117216824881468,
+        "high": 0.021191262635870213,
+        "p_value": 0.57
+      },
+      "binary_precision": {
+        "difference": -0.01449225473321858,
+        "low": -0.04568210496115481,
+        "high": 0.012889564423306682,
+        "p_value": 0.308
+      },
+      "binary_recall": {
+        "difference": 0.029069767441860517,
+        "low": 0.006022303499713103,
+        "high": 0.05697475629273967,
+        "p_value": 0.01
+      }
+    }
+  }
+}

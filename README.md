@@ -111,6 +111,9 @@ Every system writes its predictions in the same format, one JSON object per line
 | kNN vote over retrieved training sentences, bge-m3, k=3, t=2 (ours) | 94.8 | 77.8 | 78.0 | 82.6 |
 | Plain LLM: gpt-4.1-mini, zero-shot, no retrieval (ours) | 84.0 | 64.2 | 41.3 | 93.6 |
 | Legal-BERT fine-tuned, mean ± std over 3 seeds (ours) | 95.9 ± 0.4 | 82.7 ± 1.1 | 85.7 ± 4.4 | 82.0 ± 3.5 |
+| RAG: gpt-4.1-mini + examples + legal knowledge, no gate (ours) | 90.2 | 71.3 | 55.0 | 93.0 |
+| RAG examples only + evidence gate (ours, secondary) | 95.6 | 78.9 | 83.7 | 80.8 |
+| **RAG + evidence gate (ours, main system)** | **95.6** | **79.4** | **82.3** | **83.7** |
 | TF-IDF + SVM, as reported by LexGLUE | 94.7 | 75.0 | – | – |
 | Legal-BERT, as reported by LexGLUE | 96.0 | 83.0 | – | – |
 
@@ -119,6 +122,25 @@ A system that never flags anything already reaches 88.9 micro-F1, because 89% of
 The plain LLM catches almost every unfair clause (recall 93.6) but raises many false alarms (precision 41.3: 390 sentences flagged for 172 truly unfair). Most false alarms are sentences on the *topic* of an unfair clause, e.g. procedural sentences inside long arbitration sections (72 of the 77 arbitration false alarms are within ~50 sentences of a gold arbitration clause), some of which even protect the consumer. Cost of the full test run: about $0.87.
 
 Fine-tuned Legal-BERT reproduces the published result (95.9 / 82.7 vs 96.0 / 83.0) and has the best balance between precision and recall, but it still misses about one unfair clause in five and gives no reason for its decisions. Each seed trains in 7-11 minutes on a laptop RTX 4050 (6 GB). The three baselines fail in different ways: TF-IDF misses many unfair clauses, the plain LLM raises many false alarms, and Legal-BERT is accurate but opaque. The RAG system (Phase 4) aims at LLM-level recall with fewer false alarms, and an explanation for every decision.
+
+**Main system (Phase 4).** The RAG system with the evidence gate, with every choice made on validation and the test set used once, reaches 79.4 macro-F1 with 82.3 precision and 83.7 recall, without training the LLM. To know which differences are real, `scripts/compare_systems.py` runs a paired bootstrap (1,000 resamples of the same test sentences):
+
+| Main system minus... | Macro-F1 | Unfair precision | Unfair recall |
+|---|---|---|---|
+| Legal-BERT (seeds 1 / 2 / 3) | −2.5 / −4.6 / −2.8, none significant | +0.4 / −8.3* / −2.4 | −0.6 / +5.8 / 0.0 |
+| TF-IDF + SVM | +0.8 | −9.3* | **+14.5*** |
+| kNN vote | +1.6 | +4.3 | +1.2 |
+| Plain LLM | **+15.2*** | **+41.0*** | −9.9* |
+| RAG without the gate | **+8.1*** | **+27.3*** | −9.3* |
+| RAG examples only + gate | +0.5 | −1.4 | +2.9* |
+
+\* significant at 5% (the 95% interval of the difference does not contain 0).
+
+In accuracy, the main system is statistically on par with fine-tuned Legal-BERT, TF-IDF and the kNN vote: Legal-BERT keeps a lead of 2.5-4.6 macro-F1 points, which this test set (7 to 38 examples per category) cannot confirm. It is clearly better than the plain LLM and than RAG without the gate, and it finds 14.5 points more unfair clauses than TF-IDF. What it adds over all of them is the explanation: every flagged clause comes with a reason, 95.4% cite a specific legal rationale or provision (65.7% a specific article, Annex point or court case, such as Annex 1(j)-(k) of Directive 93/13 for unilateral changes or CJEU Océano for jurisdiction clauses), 77.7% cite the expert-labelled precedents they resemble, and no cited id was invented. The legal knowledge also adds recall over the examples-only system (+2.9, significant). Cost of the test run: $1.64 (main) and $1.29 (examples only).
+
+```powershell
+.\.venv\Scripts\python scripts\compare_systems.py      # paired bootstrap: main system vs every other system
+```
 
 ```powershell
 .\.venv\Scripts\python scripts\run_llm.py --dry-run      # prompt and cost estimate, no API call
@@ -218,7 +240,7 @@ Citations that do not match a retrieved item are rare: 0 in the full RAG, 2 with
 - [x] Phase 1: data download and exploration (`notebooks/01_data_exploration.ipynb`)
 - [x] Phase 2: legal knowledge base (`knowledge_base/`, `scripts/build_knowledge_base.py`)
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
-- [ ] Phase 4: RAG pipeline (done: retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations on validation; next: the final test run)
+- [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
 - [ ] Phase 5: evaluation (robustness, explainability)
 - [ ] Phase 6: multilingual fairness (extension)
 - [ ] Phase 7: demo (extension)

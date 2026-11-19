@@ -138,6 +138,34 @@ def bootstrap(y_true: np.ndarray, y_pred: np.ndarray, n_samples: int = 1000,
             for name, v in draws.items()}
 
 
+def paired_bootstrap(y_true: np.ndarray, pred_a: np.ndarray, pred_b: np.ndarray,
+                     n_samples: int = 1000, seed: int = 42) -> dict[str, dict[str, float]]:
+    """Difference A - B of the headline metrics on the same resampled sentences.
+
+    For each metric: the observed difference, its 95% interval, and a two-sided p-value
+    (twice the share of resamples where the difference has the opposite sign). Because
+    both systems are scored on the same resample, the sentences that are hard for both
+    cancel out, which makes this test sharper than comparing two separate intervals.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(y_true)
+    observed_a, observed_b = headline_metrics(y_true, pred_a), headline_metrics(y_true, pred_b)
+    draws: dict[str, list[float]] = {name: [] for name in observed_a}
+    for _ in range(n_samples):
+        idx = rng.integers(0, n, n)
+        a, b = headline_metrics(y_true[idx], pred_a[idx]), headline_metrics(y_true[idx], pred_b[idx])
+        for name in draws:
+            draws[name].append(a[name] - b[name])
+    out = {}
+    for name, values in draws.items():
+        values = np.asarray(values)
+        diff = observed_a[name] - observed_b[name]
+        opposite = (values <= 0).mean() if diff > 0 else (values >= 0).mean()
+        out[name] = {"difference": float(diff), "low": float(np.percentile(values, 2.5)),
+                     "high": float(np.percentile(values, 97.5)), "p_value": float(min(1.0, 2 * opposite))}
+    return out
+
+
 def evaluate(gold_labels: list[list[int]], pred_labels: list[list[int]],
              label_names: list[str], n_bootstrap: int = 1000, seed: int = 42) -> dict:
     """Full evaluation report as a JSON-serialisable dict."""

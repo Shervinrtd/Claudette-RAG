@@ -84,3 +84,15 @@ def test_align_detects_problems():
         align(gold, [{"id": "a", "labels": []}, {"id": "b", "labels": []}, {"id": "z", "labels": []}])
     with pytest.raises(ValueError, match="out of range"):
         to_matrix([[5]], 3)
+
+
+def test_paired_bootstrap():
+    import numpy as np
+    from claudette_rag.evaluation import paired_bootstrap
+    rng = np.random.default_rng(0)
+    y = rng.random((300, 8)) < 0.05
+    same = paired_bootstrap(y, y.copy(), y.copy(), n_samples=200)
+    assert same["lexglue_macro_f1"]["difference"] == 0 and same["lexglue_macro_f1"]["p_value"] == 1.0
+    never = np.zeros_like(y)                                  # a system that never flags anything
+    better = paired_bootstrap(y, y.copy(), never, n_samples=200)["binary_recall"]
+    assert better["difference"] == 1.0 and better["low"] > 0 and better["p_value"] < 0.05

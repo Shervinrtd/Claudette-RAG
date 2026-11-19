@@ -25,6 +25,7 @@ Online Terms of Service (ToS) often contain clauses that are potentially unfair 
 ├── report/               # LaTeX report (initial and final) and figures
 ├── results/              # predictions and evaluation reports of every system
 ├── tests/                # unit tests (python -m pytest)
+├── hpc/                  # scripts for the DISI GPU cluster (open-weight model with vLLM)
 ├── requirements.txt      # Python dependencies
 └── README.md
 ```
@@ -62,7 +63,7 @@ nvidia-smi
 
 Every LLM script (`run_llm.py`, `run_rag.py`, `faithfulness.py`) can also use an open-weight model behind any OpenAI-compatible server, with `--base-url`: the prompts, answer schema, temperature and seed stay the same, only the model changes, and there is no API cost. Runs are saved under the model's name (e.g. `rag_Qwen-Qwen3.5-27B_e8r5p6_test.json`) and record the time per request instead of a cost.
 
-On a GPU cluster, serve the model with [vLLM](https://docs.vllm.ai) (fast, many requests in parallel) and switch off the model's thinking mode, so that it answers directly like gpt-4.1-mini:
+On a GPU cluster, serve the model with [vLLM](https://docs.vllm.ai) (fast, many requests in parallel) and switch off the model's thinking mode, so that it answers directly like gpt-4.1-mini. For the DISI cluster, `hpc/` contains the complete setup and Slurm job (see `hpc/README.md`); in general:
 
 ```bash
 vllm serve <model> --port 8000 --max-model-len 8192 &

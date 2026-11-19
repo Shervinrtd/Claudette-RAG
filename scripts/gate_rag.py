@@ -11,7 +11,7 @@ knowledge base, so it can be re-run for free.
 
 Choice of (k, m), fixed in advance: on the validation set, the highest LexGLUE macro-F1
 among the settings with unfair recall >= 80%, because for consumer protection a missed
-unfair clause is worse than a false alarm. The choice is saved and reused, unchanged, on
+unfair clause is worse than a false alarm (if no setting reaches 80%: the highest recall). The choice is saved and reused, unchanged, on
 the test set and on the multilingual data.
 
 Usage (from the project root):
@@ -29,7 +29,7 @@ from pathlib import Path
 from claudette_rag.evaluation import evaluate, format_report, load_gold
 from claudette_rag.knowledge_base import load_knowledge_base
 from claudette_rag.llm import file_safe
-from claudette_rag.rag import gate_by_neighbours
+from claudette_rag.rag import choose_gate, gate_by_neighbours
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS = PROJECT_ROOT / "results"
@@ -81,8 +81,8 @@ def main() -> None:
                          ("lexglue_macro_f1", "binary_precision", "binary_recall")}})
             print(f"{k:>3} {m:>3} {100 * h['lexglue_macro_f1']:9.1f} {100 * h['binary_precision']:10.1f} "
                   f"{100 * h['binary_recall']:7.1f}")
-        best = max((g for g in grid if g["binary_recall"] >= MIN_RECALL), key=lambda g: g["lexglue_macro_f1"])
-        k, m, how = best["k"], best["m"], f"best validation macro-F1 with unfair recall >= {MIN_RECALL:.0%}"
+        best, how = choose_gate(grid, MIN_RECALL)
+        k, m = best["k"], best["m"]
         choice_path.write_text(json.dumps({"source_run": args.run, "rule": how, "k": k, "m": m,
                                            "grid": grid}, indent=2), encoding="utf-8")
         print(f"\nChosen: k={k}, m={m} ({how}) -> {choice_path.relative_to(PROJECT_ROOT)}")

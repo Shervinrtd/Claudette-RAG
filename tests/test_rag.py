@@ -6,7 +6,8 @@ from claudette_rag.llm import build_system_prompt, parse_answer, response_format
 import random
 
 from claudette_rag.rag import (build_rag_system_prompt, check_citations, context_from_ids, context_ids,
-                               format_context, gate_by_neighbours, matched_control, rag_messages)
+                               format_context, gate_by_neighbours, matched_control, rag_messages,
+                               choose_gate)
 
 CATEGORIES = [
     {"id": "ter", "name": "Unilateral termination", "definition": "Provider may terminate.",
@@ -101,3 +102,13 @@ def test_matched_control_removes_uncited_items_of_the_same_types():
     assert len(drop & {"e2", "e3", "e4"}) == 1 and drop & {"r2"} == {"r2"}
     drop, matched = matched_control(retrieved, {"r1", "r2", "p1"}, random.Random(0))
     assert not matched and drop == set()                                        # nothing uncited left to remove
+
+
+def test_choose_gate_rule():
+    grid = [{"k": 3, "m": 1, "lexglue_macro_f1": 0.70, "binary_recall": 0.90},
+            {"k": 8, "m": 3, "lexglue_macro_f1": 0.78, "binary_recall": 0.82},
+            {"k": 3, "m": 2, "lexglue_macro_f1": 0.80, "binary_recall": 0.74}]
+    best, rule = choose_gate(grid, 0.80)
+    assert (best["k"], best["m"]) == (8, 3) and "macro-F1" in rule        # 3/2 has the best F1 but low recall
+    best, rule = choose_gate([g | {"binary_recall": g["binary_recall"] - 0.2} for g in grid], 0.80)
+    assert (best["k"], best["m"]) == (3, 1) and "highest validation recall" in rule

@@ -95,6 +95,18 @@ def gate_by_neighbours(labels: list[int], neighbour_labels: list[list[int]], k: 
     return [label for label in labels if sum(label in n for n in top) >= m]
 
 
+def choose_gate(grid: list[dict], min_recall: float) -> tuple[dict, str]:
+    """Rule fixed in advance for the gate settings on validation: the best LexGLUE macro-F1 among the
+    settings with unfair recall >= min_recall; if no setting reaches it, the setting with the highest
+    recall (missing an unfair clause is worse than a false alarm)."""
+    eligible = [g for g in grid if g["binary_recall"] >= min_recall]
+    if eligible:
+        return (max(eligible, key=lambda g: g["lexglue_macro_f1"]),
+                f"best validation macro-F1 with unfair recall >= {min_recall:.0%}")
+    return (max(grid, key=lambda g: (g["binary_recall"], g["lexglue_macro_f1"])),
+            f"no setting reaches unfair recall {min_recall:.0%}: highest validation recall")
+
+
 def context_ids(context: dict) -> dict:
     """Ids of the retrieved items, for the explanation log."""
     return {"examples": [doc["id"] for doc, _ in context.get("examples", [])],

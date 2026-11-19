@@ -58,6 +58,25 @@ nvidia-smi
 .\.venv\Scripts\python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
+### Open-weight models: your machine or a GPU cluster (optional)
+
+Every LLM script (`run_llm.py`, `run_rag.py`, `faithfulness.py`) can also use an open-weight model behind any OpenAI-compatible server, with `--base-url`: the prompts, answer schema, temperature and seed stay the same, only the model changes, and there is no API cost. Runs are saved under the model's name (e.g. `rag_Qwen-Qwen3.5-27B_e8r5p6_test.json`) and record the time per request instead of a cost.
+
+On a GPU cluster, serve the model with [vLLM](https://docs.vllm.ai) (fast, many requests in parallel) and switch off the model's thinking mode, so that it answers directly like gpt-4.1-mini:
+
+```bash
+vllm serve <model> --port 8000 --max-model-len 8192 &
+python scripts/run_rag.py --model <model> --base-url http://localhost:8000/v1 --no-thinking --workers 32
+```
+
+On a laptop, [Ollama](https://ollama.com) works the same way. Our prompts are about 2,600 tokens, so raise Ollama's context length first, otherwise it may silently cut the prompts (the scripts print a warning if this happens):
+
+```powershell
+setx OLLAMA_CONTEXT_LENGTH 8192          # then quit Ollama from the tray icon and start it again
+ollama pull qwen3:8b
+.\.venv\Scripts\python scripts\run_rag.py --model qwen3:8b --base-url http://localhost:11434/v1 --sample 40
+```
+
 ## Data
 
 We use the **UNFAIR-ToS** task of the LexGLUE benchmark (Chalkidis et al., 2022), which contains sentences from 50 online Terms of Service annotated by legal experts in the Claudette project (Lippi et al., 2019). Each sentence has zero or more labels among 8 categories of potentially unfair clauses; sentences without labels are considered fair.

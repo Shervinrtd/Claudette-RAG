@@ -14,6 +14,7 @@ Usage (from the project root, after scripts/build_index.py):
     python scripts/run_rag.py                              # full validation set
     python scripts/run_rag.py --k-rationales 0 --max-provisions 0     # ablation: examples only
     python scripts/run_rag.py --split test                 # final run
+    python scripts/run_rag.py --model qwen3:8b --base-url http://localhost:11434/v1   # free local model (Ollama)
 
 Output (run = rag_<model>_e<k examples>r<k rationales>p<max provisions>_<data>):
     results/llm_logs/<run>.jsonl         raw answers and token usage (resumable)
@@ -26,7 +27,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 import sys
 from dataclasses import asdict
@@ -34,7 +34,8 @@ from pathlib import Path
 
 from claudette_rag.evaluation import evaluate, format_report, load_gold
 from claudette_rag.knowledge_base import load_knowledge_base
-from claudette_rag.llm import DEFAULT_MODEL, estimate_cost, parse_answer, response_format, run_all
+from claudette_rag.llm import (DEFAULT_MODEL, OLLAMA_URL, estimate_cost, file_safe, make_client, parse_answer,
+                               response_format, run_all, server_options, truncation_warning, usage_summary)
 from claudette_rag.rag import build_rag_system_prompt, check_citations, context_ids, rag_messages
 from claudette_rag.retrieval import KBIndex, RetrievalConfig, SentenceTransformerEmbedder, retrieve
 
@@ -53,13 +54,19 @@ def main() -> None:
     parser.add_argument("--split", default="validation")
     parser.add_argument("--language", choices=["en", "de", "it", "pl"])
     parser.add_argument("--sample", type=int, help="balanced random sample (half unfair) for quick tests")
-    parser.add_argument("--workers", type=int, default=4, help="parallel requests")
+    parser.add_argument("--workers", type=int, help="parallel requests (default 4, or 1 for a local model)")
+    parser.add_argument("--base-url", help=f"OpenAI-compatible server of a local model, e.g. {OLLAMA_URL} (Ollama)")
+    parser.add_argument("--no-thinking", action="store_true",
+                        help="local server (vLLM): switch off the model's thinking mode, like gpt-4.1-mini")
+    parser.add_argument("--extra-body", help="local server: extra request parameters as JSON text")
     parser.add_argument("--dry-run", action="store_true", help="print one prompt and the cost estimate only")
     parser.add_argument("--index", default="bge-m3", help="folder in data/processed/index/")
     parser.add_argument("--k-examples", type=int, default=8)
     parser.add_argument("--k-rationales", type=int, default=5)
     parser.add_argument("--max-provisions", type=int, default=6)
     args = parser.parse_args()
+    workers = args.workers or (1 if args.base_url else 4)
+    options = server_options(args.extra_body, args.no_thinking)
 
     kb = load_knowledge_base(PROJECT_ROOT / "knowledge_base")
     categories = sorted(kb["categories"], key=lambda c: c["label_index"])
@@ -79,7 +86,7 @@ def main() -> None:
         gold = rng.sample(unfair, min(half, len(unfair))) + rng.sample(fair, min(args.sample - half, len(fair)))
         data_name += f"_sample{args.sample}"
     setting = f"e{config.k_examples}r{config.k_rationales}p{config.max_provisions}"
-    run = f"rag_{args.model}_{setting}_{data_name}"
+    run = f"rag_{file_safe(args.model)}_{setting}_{data_name}"
 
     # ---- retrieval (local, free)
     index_dir = PROJECT_ROOT / "data" / "processed" / "index" / args.index
@@ -104,23 +111,22 @@ def main() -> None:
         full = estimate_cost(rows, args.model)
         cached = estimate_cost([{**r, "cached_tokens": system_tokens} for r in rows], args.model)
         mean_prompt = sum(r["prompt_tokens"] for r in rows) / len(rows)
-        print(f"\n{len(gold)} sentences, ~{mean_prompt:.0f} prompt tokens each -> about ${full:.2f} "
-              f"with {args.model}, about ${cached:.2f} when the system prompt comes from the prompt cache")
+        price = ("no API cost (local model)" if args.base_url else
+                 f"about ${full:.2f} with {args.model}, about ${cached:.2f} when the system prompt comes from the prompt cache")
+        print(f"\n{len(gold)} sentences, ~{mean_prompt:.0f} prompt tokens each -> {price}")
         return
 
     # ---- LLM
-    from dotenv import load_dotenv
-    from openai import OpenAI
-    load_dotenv(PROJECT_ROOT / ".env")
-    if not os.getenv("OPENAI_API_KEY"):
-        sys.exit("OPENAI_API_KEY not found: copy .env.example to .env and add your key.")
-    client = OpenAI()
+    client = make_client(args.base_url, PROJECT_ROOT)
 
     print(f"Run {run}: {len(gold)} sentences with {args.model}")
     log_path = PROJECT_ROOT / "results" / "llm_logs" / f"{run}.jsonl"
-    answers = run_all(gold, make_messages, client, args.model, fmt, log_path, workers=args.workers)
+    answers = run_all(gold, make_messages, client, args.model, fmt, log_path, workers=workers,
+                      extra_body=options)
 
     rows = [answers[g["id"]] for g in gold]
+    if args.base_url and (warning := truncation_warning(rows)):
+        print(warning)
     parsed = [parse_answer(r["content"], code_to_label) for r in rows]
     cites = [check_citations(p["cited_ids"], contexts[g["id"]]) for g, p in zip(gold, parsed)]
 
@@ -141,16 +147,15 @@ def main() -> None:
 
     report = evaluate([g["labels"] for g in gold], [p["labels"] for p in parsed], label_names)
     report["run"] = {"name": run, "system": "RAG (retrieved examples, rationales and provisions)",
-                     "model": args.model, "embedder": index.model_name, "retrieval": asdict(config),
+                     "model": args.model, "base_url": args.base_url, "server_options": options,
+                     "embedder": index.model_name,
+                     "retrieval": asdict(config),
                      "dataset": args.dataset, "split": args.split, "language": args.language,
                      "sample": args.sample, "predictions": str(pred_path.relative_to(PROJECT_ROOT)),
                      "explanations": str(expl_path.relative_to(PROJECT_ROOT)),
                      "log": str(log_path.relative_to(PROJECT_ROOT))}
     report["llm"] = {
-        "estimated_cost_usd": round(estimate_cost(rows, args.model), 4),
-        "prompt_tokens": sum(r["prompt_tokens"] for r in rows),
-        "cached_tokens": sum(r.get("cached_tokens", 0) for r in rows),
-        "completion_tokens": sum(r["completion_tokens"] for r in rows),
+        **usage_summary(rows, args.model, local=bool(args.base_url)),
         "inconsistent_answers": sum(not p["consistent"] for p in parsed),
         "parse_errors": sum(p["parse_error"] for p in parsed),
     }
@@ -168,7 +173,8 @@ def main() -> None:
 
     print("\n" + format_report(run, report))
     llm, cit = report["llm"], report["citations"]
-    print(f"\nCost of this run: ~${llm['estimated_cost_usd']:.3f} | inconsistent answers: "
+    print(f"\nCost of this run: ~${llm['estimated_cost_usd']:.3f} | {llm['mean_seconds_per_request']} s per request | "
+          f"inconsistent answers: "
           f"{llm['inconsistent_answers']} | parse errors: {llm['parse_errors']}")
     print(f"Citations: {100 * cit['answers_citing_retrieved_items']:.0f}% of answers cite retrieved items; "
           f"{100 * cit['unfair_verdicts_citing_rationale_or_provision']:.0f}% of the {cit['unfair_verdicts']} "

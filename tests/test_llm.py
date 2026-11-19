@@ -148,3 +148,39 @@ def test_out_of_credits_is_not_retried():
     assert len(completions.calls) == 1                             # no waiting, no retries
     from claudette_rag.llm import _is_retryable
     assert _is_retryable(busy) and not _is_retryable(no_credits)
+
+
+def test_local_server_gets_max_tokens_and_file_safe_names():
+    from claudette_rag.llm import file_safe, is_local, usage_summary
+    client, completions = fake_client(keyword_answer)
+    client.base_url = "http://localhost:11434/v1/"                    # e.g. Ollama
+    result = call_model(client, "qwen3:8b", zero_shot_messages("s", "terminate"), response_format(["ter"]))
+    sent = completions.calls[-1]
+    assert is_local(client) and sent["max_tokens"] == 400 and "max_completion_tokens" not in sent
+    assert sent["temperature"] == 0 and sent["seed"] == 42 and result["latency_s"] >= 0
+    openai_client, openai_calls = fake_client(keyword_answer)          # no base_url: the OpenAI API
+    call_model(openai_client, "gpt-4.1-mini", zero_shot_messages("s", "x"), response_format(["ter"]))
+    assert "max_completion_tokens" in openai_calls.calls[-1] and not is_local(openai_client)
+    assert file_safe("qwen3:8b") == "qwen3-8b" and file_safe("gpt-4.1-mini-2025-04-14") == "gpt-4.1-mini-2025-04-14"
+    summary = usage_summary([result], "qwen3:8b", local=True)
+    assert summary["estimated_cost_usd"] == 0.0 and summary["mean_seconds_per_request"] is not None
+
+
+def test_truncation_warning():
+    from claudette_rag.llm import truncation_warning
+    assert truncation_warning([{"prompt_tokens": 1500 + i} for i in range(50)]) is None
+    capped = [{"prompt_tokens": min(2048, 1800 + 20 * i)} for i in range(50)]      # many prompts cut at 2048
+    assert "truncated" in truncation_warning(capped)
+
+
+def test_server_options_and_extra_body():
+    from claudette_rag.llm import server_options
+    assert server_options(None, False) is None
+    assert server_options(None, True) == {"chat_template_kwargs": {"enable_thinking": False}}
+    merged = server_options('{"top_k": 1, "chat_template_kwargs": {"x": 1}}', True)
+    assert merged == {"top_k": 1, "chat_template_kwargs": {"x": 1, "enable_thinking": False}}
+    client, completions = fake_client(keyword_answer)
+    client.base_url = "http://gpu-node:8000/v1"
+    call_model(client, "Qwen/Qwen3.5-27B", zero_shot_messages("s", "x"), response_format(["ter"]),
+               extra_body=server_options(None, True))
+    assert completions.calls[-1]["extra_body"] == {"chat_template_kwargs": {"enable_thinking": False}}

@@ -26,15 +26,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
-import sys
 from collections import Counter
 from pathlib import Path
 
 from claudette_rag.evaluation import load_gold, mcnemar_exact
 from claudette_rag.knowledge_base import load_knowledge_base
-from claudette_rag.llm import estimate_cost, parse_answer, response_format, run_all
+from claudette_rag.llm import estimate_cost, make_client, parse_answer, response_format, run_all
 from claudette_rag.rag import build_rag_system_prompt, context_from_ids, matched_control, rag_messages
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -48,12 +46,16 @@ def main() -> None:
     parser.add_argument("--run", default="rag_gpt-4.1-mini-2025-04-14_e8r5p6_test")
     parser.add_argument("--test", choices=["faithfulness", "stability", "all"], default="all")
     parser.add_argument("--stability-sample", type=int, default=300)
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--workers", type=int, help="parallel requests (default 4, or 1 for a local model)")
+    parser.add_argument("--base-url", help="local OpenAI-compatible server (default: the one of the analysed run)")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
     info = json.loads((RESULTS / f"{args.run}.json").read_text(encoding="utf-8"))["run"]
     model = info["model"]
+    base_url = args.base_url or info.get("base_url")
+    workers = args.workers or (1 if base_url else 4)
+    options = info.get("server_options")          # the same server parameters as the analysed run
     categories = sorted(load_knowledge_base(PROJECT_ROOT / "knowledge_base")["categories"],
                         key=lambda c: c["label_index"])
     code_to_label = {c["id"]: c["label_index"] for c in categories}
@@ -99,7 +101,7 @@ def main() -> None:
             make = maker(cond)
             rows = [{"prompt_tokens": sum(len(m["content"]) for m in make(rec)) / 4,
                      "cached_tokens": len(system_prompt) / 4, "completion_tokens": 130} for rec, _ in items]
-            cost = estimate_cost(rows, model)
+            cost = 0.0 if base_url else estimate_cost(rows, model)
             total += cost
             print(f"{cond:15s} {len(items):4d} requests, about ${cost:.2f}")
         if unmatched:
@@ -108,24 +110,20 @@ def main() -> None:
         print(f"Total: about ${total:.2f} with {model} (with the system prompt cached; up to ~40% more without)")
         return
 
-    from dotenv import load_dotenv
-    from openai import OpenAI
-    load_dotenv(PROJECT_ROOT / ".env")
-    if not os.getenv("OPENAI_API_KEY"):
-        sys.exit("OPENAI_API_KEY not found: copy .env.example to .env and add your key.")
-    client = OpenAI()
+    client = make_client(base_url, PROJECT_ROOT)
 
     report = {"run": args.run, "model": model, "conditions": {}}
     answers_by_condition = {}
     for cond, items in jobs.items():
         log = RESULTS / "llm_logs" / f"{cond}_{args.run}.jsonl"
         print(f"{cond}: {len(items)} requests")
-        answers = run_all([rec for rec, _ in items], maker(cond), client, model, fmt, log, workers=args.workers)
+        answers = run_all([rec for rec, _ in items], maker(cond), client, model, fmt, log, workers=workers,
+                          extra_body=options)
         answers_by_condition[cond] = {sid: parse_answer(answers[sid]["content"], code_to_label)["labels"]
                                       for sid in (rec["id"] for rec, _ in items)}
         rows = [answers[rec["id"]] for rec, _ in items]
         report["conditions"][cond] = {"requests": len(items),
-                                      "estimated_cost_usd": round(estimate_cost(rows, model), 4)}
+                                      "estimated_cost_usd": 0.0 if base_url else round(estimate_cost(rows, model), 4)}
 
     def compare(cond: str, subset=None) -> dict:
         new = answers_by_condition[cond]

@@ -9,6 +9,7 @@ Usage (from the project root):
     python scripts/run_llm.py --sample 40                   # quick test: 20 unfair + 20 fair test sentences
     python scripts/run_llm.py                               # full UNFAIR-ToS test set
     python scripts/run_llm.py --dataset multilingual --language it
+    python scripts/run_llm.py --model qwen3:8b --base-url http://localhost:11434/v1   # free local model (Ollama)
 
 Output (run = llm_zeroshot_<model>_<data>):
     results/llm_logs/<run>.jsonl         raw answers, explanations, token usage (resumable)
@@ -20,15 +21,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
-import sys
 from pathlib import Path
 
 from claudette_rag.evaluation import evaluate, format_report, load_gold
 from claudette_rag.knowledge_base import load_knowledge_base
-from claudette_rag.llm import (DEFAULT_MODEL, build_system_prompt, estimate_cost, parse_answer,
-                               response_format, run_all, zero_shot_messages)
+from claudette_rag.llm import (DEFAULT_MODEL, OLLAMA_URL, build_system_prompt, estimate_cost, file_safe,
+                               make_client, parse_answer, response_format, run_all, server_options,
+                               truncation_warning, usage_summary, zero_shot_messages)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -45,9 +45,15 @@ def main() -> None:
     parser.add_argument("--split", default="test")
     parser.add_argument("--language", choices=["en", "de", "it", "pl"])
     parser.add_argument("--sample", type=int, help="balanced random sample (half unfair) for quick tests")
-    parser.add_argument("--workers", type=int, default=4, help="parallel requests")
+    parser.add_argument("--workers", type=int, help="parallel requests (default 4, or 1 for a local model)")
+    parser.add_argument("--base-url", help=f"OpenAI-compatible server of a local model, e.g. {OLLAMA_URL} (Ollama)")
+    parser.add_argument("--no-thinking", action="store_true",
+                        help="local server (vLLM): switch off the model's thinking mode, like gpt-4.1-mini")
+    parser.add_argument("--extra-body", help="local server: extra request parameters as JSON text")
     parser.add_argument("--dry-run", action="store_true", help="print prompt and cost estimate only")
     args = parser.parse_args()
+    workers = args.workers or (1 if args.base_url else 4)
+    options = server_options(args.extra_body, args.no_thinking)
 
     kb = load_knowledge_base(PROJECT_ROOT / "knowledge_base")
     categories = sorted(kb["categories"], key=lambda c: c["label_index"])
@@ -65,7 +71,7 @@ def main() -> None:
         half = args.sample // 2
         gold = rng.sample(unfair, min(half, len(unfair))) + rng.sample(fair, min(args.sample - half, len(fair)))
         data_name += f"_sample{args.sample}"
-    run = f"llm_zeroshot_{args.model}_{data_name}"
+    run = f"llm_zeroshot_{file_safe(args.model)}_{data_name}"
 
     if args.dry_run:
         example = zero_shot_messages(system_prompt, sentence_text(gold[0]))
@@ -73,23 +79,21 @@ def main() -> None:
         prompt_tokens = (len(system_prompt) + 60) / 4 + sum(len(sentence_text(g)) for g in gold) / 4 / len(gold)
         n = len(gold)
         est = estimate_cost([{"prompt_tokens": prompt_tokens, "completion_tokens": 90}] * n, args.model)
-        print(f"\n{n} sentences, ~{prompt_tokens:.0f} prompt tokens each -> about ${est:.2f} "
-              f"with {args.model} (before prompt-caching discounts)")
+        price = "no API cost (local model)" if args.base_url else f"about ${est:.2f} with {args.model} (before prompt-caching discounts)"
+        print(f"\n{n} sentences, ~{prompt_tokens:.0f} prompt tokens each -> {price}")
         return
 
-    from dotenv import load_dotenv
-    from openai import OpenAI
-    load_dotenv(PROJECT_ROOT / ".env")
-    if not os.getenv("OPENAI_API_KEY"):
-        sys.exit("OPENAI_API_KEY not found: copy .env.example to .env and add your key.")
-    client = OpenAI()
+    client = make_client(args.base_url, PROJECT_ROOT)
 
     print(f"Run {run}: {len(gold)} sentences with {args.model}")
     log_path = PROJECT_ROOT / "results" / "llm_logs" / f"{run}.jsonl"
     answers = run_all(gold, lambda r: zero_shot_messages(system_prompt, sentence_text(r)),
-                      client, args.model, fmt, log_path, workers=args.workers)
+                      client, args.model, fmt, log_path, workers=workers,
+                      extra_body=options)
 
     rows = [answers[g["id"]] for g in gold]
+    if args.base_url and (warning := truncation_warning(rows)):
+        print(warning)
     parsed = [parse_answer(r["content"], code_to_label) for r in rows]
     pred_path = PROJECT_ROOT / "results" / "predictions" / f"{run}.jsonl"
     pred_path.parent.mkdir(parents=True, exist_ok=True)
@@ -99,14 +103,12 @@ def main() -> None:
 
     report = evaluate([g["labels"] for g in gold], [p["labels"] for p in parsed], label_names)
     report["run"] = {"name": run, "system": "plain LLM (zero-shot, no retrieval)", "model": args.model,
+                     "base_url": args.base_url, "server_options": options,
                      "dataset": args.dataset, "split": args.split, "language": args.language,
                      "sample": args.sample, "predictions": str(pred_path.relative_to(PROJECT_ROOT)),
                      "log": str(log_path.relative_to(PROJECT_ROOT))}
     report["llm"] = {
-        "estimated_cost_usd": round(estimate_cost(rows, args.model), 4),
-        "prompt_tokens": sum(r["prompt_tokens"] for r in rows),
-        "cached_tokens": sum(r.get("cached_tokens", 0) for r in rows),
-        "completion_tokens": sum(r["completion_tokens"] for r in rows),
+        **usage_summary(rows, args.model, local=bool(args.base_url)),
         "inconsistent_answers": sum(not p["consistent"] for p in parsed),
         "parse_errors": sum(p["parse_error"] for p in parsed),
     }
@@ -116,6 +118,7 @@ def main() -> None:
     print("\n" + format_report(run, report))
     llm = report["llm"]
     print(f"\nCost so far for this run: ~${llm['estimated_cost_usd']:.3f} | "
+          f"{llm['mean_seconds_per_request']} s per request | "
           f"inconsistent answers: {llm['inconsistent_answers']} | parse errors: {llm['parse_errors']}")
     print(f"Saved -> {out.relative_to(PROJECT_ROOT)}")
 

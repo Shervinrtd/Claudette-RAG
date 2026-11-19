@@ -28,6 +28,7 @@ from pathlib import Path
 
 from claudette_rag.evaluation import evaluate, format_report, load_gold
 from claudette_rag.knowledge_base import load_knowledge_base
+from claudette_rag.llm import file_safe
 from claudette_rag.rag import gate_by_neighbours
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -64,7 +65,7 @@ def main() -> None:
     def gated(k: int, m: int) -> list[list[int]]:
         return [gate_by_neighbours(p, n, k, m) for p, n in zip(llm, neighbours)]
 
-    choice_path = RESULTS / f"gate_choice_{info['model']}_e{info['retrieval']['k_examples']}" \
+    choice_path = RESULTS / f"gate_choice_{file_safe(info['model'])}_e{info['retrieval']['k_examples']}" \
                             f"r{info['retrieval']['k_rationales']}p{info['retrieval']['max_provisions']}.json"
     if args.k and args.m:
         k, m, how = args.k, args.m, "fixed on the command line"

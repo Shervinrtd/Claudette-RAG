@@ -122,3 +122,17 @@ def retrieve(index: KBIndex, query_vectors: np.ndarray, config: RetrievalConfig)
         provisions = [index.by_id[p] for p in provision_ids[:config.max_provisions]]
         results.append({"examples": ex, "rationales": rat, "provisions": provisions})
     return results
+
+
+def knn_vote(neighbour_labels: list[list[list[int]]], k: int, t: int, n_labels: int) -> list[list[int]]:
+    """kNN baseline: a category is predicted when at least t of the k nearest training sentences have it.
+
+    neighbour_labels: for each sentence, the label lists of its nearest training sentences, most similar first.
+    """
+    preds = []
+    for neighbours in neighbour_labels:
+        counts = np.zeros(n_labels, dtype=int)
+        for labels in neighbours[:k]:
+            counts[labels] += 1
+        preds.append([int(c) for c in np.flatnonzero(counts >= t)])
+    return preds

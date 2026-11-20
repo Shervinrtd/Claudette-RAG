@@ -72,3 +72,11 @@ def test_save_and_load_roundtrip(tmp_path):
     np.testing.assert_allclose(loaded.embeddings, index.embeddings)
     q = emb.encode(["binding arbitration"])
     assert loaded.search(q, "example", 1)[0][0][0]["id"] == "ex.3"
+
+
+def test_knn_vote():
+    from claudette_rag.retrieval import knn_vote
+    neighbours = [[[1], [1, 2], [], [2]], [[], [], [0]]]
+    assert knn_vote(neighbours, k=3, t=2, n_labels=3) == [[1], []]
+    assert knn_vote(neighbours, k=4, t=2, n_labels=3) == [[1, 2], []]
+    assert knn_vote(neighbours, k=3, t=1, n_labels=3) == [[1, 2], [0]]

@@ -37,7 +37,7 @@ The setup takes 30-60 minutes (the model is about 30 GB) and keeps running if yo
 
 ```bash
 cd /scratch.hpc/$USER/Claudette-RAG
-sbatch hpc/run.sbatch pilot
+sbatch --time=01:00:00 hpc/run.sbatch pilot
 squeue -u $USER                                      # PD = waiting for a GPU, R = running
 tail -f /scratch.hpc/$USER/logs/claudette-rag-<job id>.out
 ```
@@ -47,13 +47,14 @@ The first start of vLLM takes about 10 minutes (loading the model and compiling 
 ## 3. Full run
 
 ```bash
-sbatch hpc/run.sbatch all            # english stage, then multilingual stage
+sbatch hpc/run.sbatch all            # baselines, english stage, then multilingual stage
 ```
 
 | Stage | What runs |
 |---|---|
 | `english` | plain LLM, RAG and the two ablations on validation; the evidence gate tuned on validation; plain LLM, RAG and examples-only on test, with the gate; the faithfulness and stability tests |
-| `multilingual` | plain LLM, RAG and the gate (with the setting chosen on validation) on the English, German, Italian and Polish evaluation sets |
+| `multilingual` | plain LLM, RAG and the gate (with the setting chosen on validation) on the English, German, Italian and Polish evaluation sets, then the fairness analysis by language (`scripts/multilingual_fairness.py`) |
+| `baselines` | free baselines on the four languages, without the LLM: TF-IDF + SVM and the kNN vote (`scripts/baselines_multilingual.py`), and Legal-BERT retrained with 3 seeds (`train_bert.py --tag hpc --multilingual`) |
 
 Every run resumes from its log, so if a job stops (time limit, node failure), submit the same command again. If something fails, the job log shows `!! FAILED` and the next step still runs; the vLLM log is in `/scratch.hpc/$USER/logs/vllm-<job id>.log`.
 
@@ -70,6 +71,9 @@ This merges the new result files (named after the model, e.g. `rag_Qwen-Qwen3.6-
 ## Troubleshooting
 
 - **vLLM does not start**: read the vLLM log. If the model is not supported by the installed vLLM, set `LLM_MODEL=Qwen/Qwen3.5-27B-FP8` and `LLM_DIR=$MODELS/Qwen3.5-27B-FP8` in `hpc/env.sh`, download it on giano (`source hpc/env.sh && source $VENV/bin/activate && hf download $LLM_MODEL --local-dir $LLM_DIR`) and submit again.
-- **The job waits for a long time**: `sinfo -p l40` shows how many L40 nodes are free; the queue is shared with other students.
+- **The job waits for a long time** (`PD` with reason `Priority` or `Resources`): the L40 queue is shared with other students.
+  - `sinfo -p l40` shows the state of the 4 L40 nodes, `squeue -p l40` who is using them and for how long, and `squeue -j <job id> --start` Slurm's estimate of when your job will start.
+  - Ask for less time: Slurm can start a short job in a gap before a long one (backfill), so give each job only the time it needs, e.g. `sbatch --time=01:00:00 hpc/run.sbatch pilot`, `--time=12:00:00` for `english` or `multilingual`. A job that hits its time limit resumes when you submit it again.
+  - The `baselines` stage needs no LLM and fits the smaller GPUs: `sbatch --partition=rtx2080 --mem=32G --time=03:00:00 hpc/run.sbatch baselines`.
 - **"Disk quota exceeded" in the home folder**: something wrote a cache outside scratch; check with `du -sh ~/.cache ~/.local` and delete it.
 - **The environment or the model disappeared**: scratch deletes files unused for 40 days; run `bash hpc/setup.sh` again.

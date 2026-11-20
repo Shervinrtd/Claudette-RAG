@@ -28,14 +28,14 @@ RESULTS = PROJECT_ROOT / "results"
 
 
 def write_run(run: str, split: str, records: list[dict], pred: list[list[int]],
-              label_names: list[str], info: dict) -> dict:
+              label_names: list[str], info: dict, dataset: str = "unfair_tos") -> dict:
     pred_path = RESULTS / "predictions" / f"{run}_{split}.jsonl"
     pred_path.parent.mkdir(parents=True, exist_ok=True)
     with pred_path.open("w", encoding="utf-8") as f:
         for r, labels in zip(records, pred):
             f.write(json.dumps({"id": r["id"], "labels": labels}) + "\n")
     report = evaluate([r["labels"] for r in records], pred, label_names)
-    report["run"] = {"name": f"{run}_{split}", "dataset": "unfair_tos", "split": split,
+    report["run"] = {"name": f"{run}_{split}", "dataset": dataset, "split": split,
                      "predictions": str(pred_path.relative_to(PROJECT_ROOT)), **info}
     (RESULTS / f"{run}_{split}.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
@@ -53,6 +53,10 @@ def main() -> None:
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--limit", type=int, help="use only the first N training sentences (debug)")
     parser.add_argument("--save-model", action="store_true", help="save the best model of each seed in models/")
+    parser.add_argument("--multilingual", action="store_true",
+                        help="also predict the multilingual evaluation set (en, de, it, pl) with each seed")
+    parser.add_argument("--tag", help="extra name part, so that a new training does not overwrite earlier runs "
+                                      "(e.g. --tag hpc for the runs on the GPU cluster)")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -67,7 +71,9 @@ def main() -> None:
     if args.limit:
         data["train"] = data["train"][:args.limit]
     short = args.model.rstrip("/").split("/")[-1]
-    base = f"bert_{short}" + (f"_limit{args.limit}" if args.limit else "")
+    base = f"bert_{short}" + (f"_{args.tag}" if args.tag else "") + (f"_limit{args.limit}" if args.limit else "")
+    multilingual = ({lang: load_gold(PROJECT_ROOT, "multilingual", language=lang) for lang in ("en", "de", "it", "pl")}
+                    if args.multilingual else {})
 
     test_reports = []
     for seed in args.seeds:
@@ -89,6 +95,12 @@ def main() -> None:
             report = write_run(run, split, data[split], pred, label_names, info)
         test_reports.append(report)
         print(format_report(f"{run}_test", report))
+        for lang, records in multilingual.items():
+            loader = make_loader(records, tokenizer, len(label_names), args.max_length, 64, False)
+            pred = probs_to_labels(predict_probs(model, loader, device), args.threshold)
+            r = write_run(run, f"multilingual_{lang}", records, pred, label_names, info, dataset="multilingual")
+            print(f"  multilingual {lang}: macro-F1 {100 * r['headline']['lexglue_macro_f1']:.1f}, "
+                  f"recall {100 * r['headline']['binary_recall']:.1f}")
         if args.save_model:
             out = PROJECT_ROOT / "models" / run
             model.save_pretrained(out)

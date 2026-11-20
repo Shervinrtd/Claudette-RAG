@@ -27,7 +27,7 @@ import numpy as np
 
 from claudette_rag.evaluation import evaluate, format_report, load_gold
 from claudette_rag.knowledge_base import load_knowledge_base
-from claudette_rag.retrieval import DEFAULT_EMBEDDER, KBIndex, SentenceTransformerEmbedder
+from claudette_rag.retrieval import DEFAULT_EMBEDDER, KBIndex, SentenceTransformerEmbedder, knn_vote
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RESULTS = PROJECT_ROOT / "results"
@@ -52,16 +52,6 @@ def retrieval_quality(index: KBIndex, vectors: np.ndarray, gold: list[dict], cod
         table[k] = {"example_hit": ex_hits / len(unfair), "rationale_hit": rat_hits / len(unfair),
                     "fair_purity": float(purity)}
     return table
-
-
-def knn_predict(neighbour_labels: list[list[list[int]]], k: int, t: int, n_labels: int) -> list[list[int]]:
-    preds = []
-    for neighbours in neighbour_labels:
-        counts = np.zeros(n_labels, dtype=int)
-        for labels in neighbours[:k]:
-            counts[labels] += 1
-        preds.append([int(c) for c in np.flatnonzero(counts >= t)])
-    return preds
 
 
 def main() -> None:
@@ -93,7 +83,7 @@ def main() -> None:
     best = None
     for k in KNN_K:
         for t in range(1, k + 1):
-            pred = knn_predict(neighbours["validation"], k, t, len(label_names))
+            pred = knn_vote(neighbours["validation"], k, t, len(label_names))
             score = evaluate([g["labels"] for g in gold["validation"]], pred, label_names,
                              n_bootstrap=0)["headline"]["lexglue_macro_f1"]
             if best is None or score > best[0]:
@@ -103,7 +93,7 @@ def main() -> None:
 
     run = f"knn_{short}"
     for split in ("validation", "test"):
-        pred = knn_predict(neighbours[split], k, t, len(label_names))
+        pred = knn_vote(neighbours[split], k, t, len(label_names))
         pred_path = RESULTS / "predictions" / f"{run}_{split}.jsonl"
         pred_path.parent.mkdir(parents=True, exist_ok=True)
         with pred_path.open("w", encoding="utf-8") as f:

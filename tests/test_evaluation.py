@@ -103,3 +103,19 @@ def test_mcnemar_exact():
     assert mcnemar_exact(0, 0) == 1.0 and mcnemar_exact(5, 5) == 1.0
     assert mcnemar_exact(10, 0) == pytest.approx(2 / 1024)                  # 10 discordant pairs, all one way
     assert mcnemar_exact(52, 5) < 1e-9
+
+
+def test_group_rates_and_gap():
+    from claudette_rag.evaluation import bootstrap_gap, group_rates
+    y = to_matrix([[0], [1], [], [], [], []], 3)               # 2 unfair, 4 fair sentences
+    p = to_matrix([[0], [], [2], [], [], []], 3)                # 1 caught, 1 false alarm
+    r = group_rates(y, p)
+    assert r["recall"] == 0.5 and r["false_alarm_rate"] == 0.25 and r["precision"] == 0.5
+    assert r["flagged"] == pytest.approx(2 / 6)
+    same = bootstrap_gap(y, [p], y.copy(), [p.copy()], n_samples=100)
+    assert same["recall"]["difference"] == 0 and same["recall"]["p_value"] == 1.0
+    never = np.zeros_like(y)
+    worse = bootstrap_gap(y, [p], y.copy(), [never], n_samples=100)["recall"]
+    assert worse["difference"] == -0.5 and worse["high"] <= 0
+    two_seeds = bootstrap_gap(y, [p], y.copy(), [p.copy(), never], n_samples=50)["recall"]
+    assert two_seeds["difference"] == pytest.approx(-0.25)    # mean over seeds: (0.5 + 0) / 2 - 0.5

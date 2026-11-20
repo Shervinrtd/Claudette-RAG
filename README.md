@@ -311,6 +311,23 @@ UNFAIR-ToS also contains duplicate sentences in the test set (e.g. test-612/616 
 
 The automatic checks show that the explanations are grounded (they cite retrieved legal sources consistent with the verdict, and never invent one) and faithful (the cited evidence really drives the decision). They do not show that the legal reasoning is correct: that would need a review of the explanations by legal experts, which is outside the scope of this project. Grounding and faithfulness are necessary for a trustworthy explanation, but not sufficient, as the convincingly cited false alarms above show.
 
+## Multilingual fairness (Phase 6)
+
+Does the system protect consumers equally in every language? The groups are the languages of the multilingual evaluation set: the Terms of Service of the same 10 companies in English, German, Italian and Polish, annotated by legal experts. English, the language of the training data and of the knowledge base, is the reference group.
+
+Classifying about 10,000 sentences per system with gpt-4.1-mini was beyond our budget, so the whole pipeline is replicated with an open-weight model, Qwen3.6-27B (FP8), on one GPU of the DISI cluster (see `hpc/README.md`), and all cross-language comparisons use this single model. The gpt-4.1-mini results above remain our main results on the English benchmark; the replication also shows which findings hold across models.
+
+`scripts/multilingual_fairness.py` reports, for each system and language, the criteria of group fairness seen in the course: recall of unfair clauses (equality of opportunity), false-alarm rate (equal false positive rates; together: equalized odds), precision (conditional use error), share of sentences flagged (statistical parity) and macro-F1. Each language is compared with English through the ratio of the rates, with the AEQUITAS convention that a ratio between 0.8 and 1.25 counts as parity, and through the difference, with a 95% bootstrap interval.
+
+```bash
+sbatch hpc/run.sbatch all                                            # on the cluster: everything
+python scripts/baselines_multilingual.py                             # TF-IDF and kNN on the four languages
+python scripts/train_bert.py --tag hpc --multilingual                # Legal-BERT, 3 seeds, four languages
+python scripts/multilingual_fairness.py --model Qwen/Qwen3.6-27B-FP8 # fairness by language
+```
+
+Results: to be added.
+
 ## Notebooks
 
 | Notebook | Content |
@@ -326,5 +343,5 @@ The automatic checks show that the explanations are grounded (they cite retrieve
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
 - [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
 - [x] Phase 5: evaluation of the explanations (grounding, error analysis, faithfulness, stability)
-- [ ] Phase 6: multilingual fairness (extension)
+- [ ] Phase 6: multilingual fairness (extension; in progress: open-weight replication on the DISI cluster)
 - [ ] Phase 7: demo (extension)

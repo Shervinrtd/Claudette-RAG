@@ -239,3 +239,50 @@ def mcnemar_exact(b: int, c: int) -> float:
         return 1.0
     tail = sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2 ** n
     return min(1.0, 2 * tail)
+
+
+# ----------------------------------------------------------------------------- group fairness
+def group_rates(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, float]:
+    """Rates used by the group-fairness criteria (an unfair clause is the "positive" case).
+
+    recall: unfair sentences flagged (equality of opportunity compares it across groups);
+    false_alarm_rate: fair sentences flagged (equal false positive rates; with recall: equalized odds);
+    precision: flags that are right (1 - precision is the conditional use error of positive predictions);
+    flagged: share of all sentences flagged (statistical parity); macro_f1: LexGLUE macro-F1.
+    """
+    h = headline_metrics(y_true, y_pred)
+    b_true, b_pred = y_true.any(axis=1), y_pred.any(axis=1)
+    fair = ~b_true
+    return {"recall": h["binary_recall"], "precision": h["binary_precision"],
+            "false_alarm_rate": float((b_pred & fair).sum() / max(1, fair.sum())),
+            "flagged": float(b_pred.mean()), "macro_f1": h["lexglue_macro_f1"]}
+
+
+def bootstrap_gap(y_ref: np.ndarray, preds_ref: list[np.ndarray], y_grp: np.ndarray, preds_grp: list[np.ndarray],
+                  n_samples: int = 1000, seed: int = 42) -> dict[str, dict[str, float]]:
+    """Difference group - reference of every rate, with a 95% interval and a two-sided p-value.
+
+    The two groups are different sentences, so they are resampled independently. With several
+    prediction sets per group (e.g. seeds of a fine-tuned model) the rate is their mean.
+    """
+    def mean_rates(y, preds, idx):
+        rates = [group_rates(y[idx], p[idx]) for p in preds]
+        return {k: float(np.mean([r[k] for r in rates])) for k in rates[0]}
+
+    rng = np.random.default_rng(seed)
+    observed = {k: v - mean_rates(y_ref, preds_ref, np.arange(len(y_ref)))[k]
+                for k, v in mean_rates(y_grp, preds_grp, np.arange(len(y_grp))).items()}
+    draws: dict[str, list[float]] = {k: [] for k in observed}
+    for _ in range(n_samples):
+        r = mean_rates(y_ref, preds_ref, rng.integers(0, len(y_ref), len(y_ref)))
+        g = mean_rates(y_grp, preds_grp, rng.integers(0, len(y_grp), len(y_grp)))
+        for k in draws:
+            draws[k].append(g[k] - r[k])
+    out = {}
+    for k, values in draws.items():
+        values = np.asarray(values)
+        diff = observed[k]
+        opposite = (values <= 0).mean() if diff > 0 else (values >= 0).mean()
+        out[k] = {"difference": diff, "low": float(np.percentile(values, 2.5)),
+                  "high": float(np.percentile(values, 97.5)), "p_value": float(min(1.0, 2 * opposite))}
+    return out

@@ -24,8 +24,9 @@ python scripts/download_multilingual.py
 python scripts/prepare_multilingual_eval.py
 python scripts/build_knowledge_base.py
 
-echo "== 4/4 Models: $LLM_MODEL and the retrieval embedder BAAI/bge-m3"
+echo "== 4/4 Models: $LLM_MODEL, the retrieval embedder BAAI/bge-m3 and Legal-BERT"
 hf download "$LLM_MODEL" --local-dir "$LLM_DIR"
+hf download nlpaueb/legal-bert-base-uncased
 python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('BAAI/bge-m3', device='cpu')"
 
 python -m pytest -q

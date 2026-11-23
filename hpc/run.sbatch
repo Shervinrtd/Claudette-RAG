@@ -43,9 +43,11 @@ case "$STAGE" in
 esac
 
 # start the model server; thinking is switched off per request (--no-thinking), the reasoning
-# parser only keeps any stray thinking text out of the answer
+# parser only keeps any stray thinking text out of the answer. --max-num-seqs: Qwen3.5/3.6 keep a
+# per-request state (Mamba cache) and on one L40 there is room for about 177 of them, fewer than
+# vLLM's default of 256; our scripts send at most 32 requests at a time.
 vllm serve "$LLM_DIR" --served-model-name "$LLM_MODEL" --port 8000 \
-    --max-model-len 8192 --gpu-memory-utilization 0.85 --enable-prefix-caching \
+    --max-model-len 8192 --gpu-memory-utilization 0.85 --enable-prefix-caching --max-num-seqs 64 \
     --language-model-only --reasoning-parser qwen3 > "$LOGS/vllm-$SLURM_JOB_ID.log" 2>&1 &
 VLLM_PID=$!
 trap 'kill $VLLM_PID 2>/dev/null' EXIT

@@ -70,6 +70,9 @@ This merges the new result files (named after the model, e.g. `rag_Qwen-Qwen3.6-
 
 ## Troubleshooting
 
+- **Find the error of a failed vLLM start**: the job log only says `vLLM stopped`; the cause is the last line of the error block in the vLLM log: `grep "core.py" /scratch.hpc/$USER/logs/vllm-<job id>.log | tail -12`.
+- **`max_num_seqs (256) exceeds available Mamba cache blocks`**: fixed in `run.sbatch` with `--max-num-seqs 64`. Qwen3.5/3.6 keep a state per running request and one L40 has room for about 177 of them, fewer than vLLM's default of 256.
+- **"Your GPU does not have native support for FP8 computation"** (warning, not an error): this vLLM build stores the weights in FP8 but computes in 16-bit on the L40 (Marlin kernel). The answers are the same; it is only somewhat slower.
 - **vLLM does not start**: read the vLLM log. If the model is not supported by the installed vLLM, set `LLM_MODEL=Qwen/Qwen3.5-27B-FP8` and `LLM_DIR=$MODELS/Qwen3.5-27B-FP8` in `hpc/env.sh`, download it on giano (`source hpc/env.sh && source $VENV/bin/activate && hf download $LLM_MODEL --local-dir $LLM_DIR`) and submit again.
 - **The job waits for a long time** (`PD` with reason `Priority` or `Resources`): the L40 queue is shared with other students.
   - `sinfo -p l40` shows the state of the 4 L40 nodes, `squeue -p l40` who is using them and for how long, and `squeue -j <job id> --start` Slurm's estimate of when your job will start.

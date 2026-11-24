@@ -1,0 +1,86 @@
+\section{Evaluation of the explanations}
+\label{sec:explanations}
+
+An explanation can fail in three ways. It can cite nothing relevant (it is not \emph{grounded}). It can cite evidence that did not actually drive the decision (it is not \emph{faithful}). Or it can be grounded and faithful and still support a wrong verdict. We measure the first two automatically on the test set and examine the third through an error analysis.
+
+\subsection{Grounding}
+
+For each of the 187 categories flagged by the main system on the test set (175 sentences), we check the cited ids against the knowledge base (Table~\ref{tab:grounding}).
+
+\begin{table}[ht]
+\centering\small
+\caption{Grounding of the explanations of the main system on the test set, for correct and wrong flagged categories.}
+\label{tab:grounding}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+For each flagged category, the explanation\ldots & Correct (145) & Wrong (42) \\
+\midrule
+cites a legal rationale or provision & 100\% & 100\% \\
+\quad other than the general test of Article 3(1) & 96\% & 95\% \\
+cites legal evidence consistent with the category & 95\% & 81\% \\
+cites an expert-labelled example of that category & 79\% & 62\% \\
+cites a ``clearly fair'' rationale for an unfair verdict & 1\% & 0\% \\
+cites an id that was not retrieved & 0\% & 0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The explanations are grounded: every flag cites legal sources, which are almost always consistent with the category and never invented. But \textbf{grounding is not correctness}: wrong flags are justified almost as convincingly as correct ones. Without the gate the gap is even smaller. 87\% of the wrong flags of the plain RAG cite legal evidence consistent with their category, against 95\% of the correct ones. What separates right from wrong are the expert precedents (76\% against 35\% cite a matching example), which is exactly the signal the evidence gate uses. A well-cited explanation is therefore no guarantee that the verdict is right, a risk of automation bias that Section~\ref{sec:ethics-kant} discusses.
+
+\subsection{Faithfulness and stability}
+
+To test whether the citations are the real reasons for a decision, we sent again the prompt of every sentence the RAG system (without the gate) judged unfair, removing the items its explanation cites. As a control, the same prompt is sent again with the same number of uncited items of the same types removed instead. If the citations drive the decision, removing them must change the verdict more often than the control. The two outcomes of each sentence are compared with an exact McNemar test~\citep{mcnemar1947} (Table~\ref{tab:faithfulness}).
+
+\begin{table}[ht]
+\centering\small
+\caption{Faithfulness: share of unfair verdicts that flip to fair when the cited items, or as many uncited items, are removed (gpt-4.1-mini, test set).}
+\label{tab:faithfulness}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Unfair verdicts of the RAG & Remove cited items & Remove uncited items & McNemar $p$ \\
+\midrule
+All (291) & 27.8\% & 8.2\% & $10^{-12}$ \\
+Control with the same mix of types (225) & 30.2\% & 9.3\% & $6\cdot10^{-11}$ \\
+Correct category (157) & 10.8\% & 2.5\% & 0.001 \\
+Wrong flag (134) & 47.8\% & 14.9\% & $10^{-9}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{The citations are faithful.} Removing them changes the verdict three times more often than the control.
+  \item \textbf{The citations are not the only reason.} Most verdicts survive their removal, because the model also reads the sentence itself.
+  \item \textbf{Correct flags are robust.} Only 10.8\% flip.
+  \item \textbf{Wrong flags depend on the evidence.} 64 of the 134 wrong flags disappear without their citations, and all 64 sentences are fair for the experts: the retrieved evidence talked the model into a false alarm. This is the same priming seen in the ablation with legal knowledge alone (Section~\ref{sec:ablation}).
+  \item \textbf{The answers are stable.} The same prompt, repeated 300 times, gives the same labels in 98.3\% of the cases; the 5 differences are all borderline cases. Temperature 0 and a fixed seed do not make the API fully deterministic.
+\end{itemize}
+
+The test cost \$0.81. The replication with Qwen3.6-27B gives the same picture: removing citations flips 20.4\% of the verdicts against 6.8\% for the control ($p = 3\cdot10^{-8}$), correct flags rarely flip (4.3\%) while wrong ones often do (38.4\%), and 99.3\% of the repeated answers are identical.
+
+\subsection{Error analysis}
+
+The main system disagrees with the experts on 74 test sentences. We read all of them with two sentences of context on each side.
+\begin{itemize}
+  \item \textbf{False alarms (31).}
+    \begin{itemize}
+      \item 6 near misses, next to the expert-labelled clause of the same category;
+      \item 7 summaries, procedural details or waivers inside an arbitration section;
+      \item 4 references to other policies (``you agree to our commerce terms'') read as contract by using;
+      \item 3 that ignore a legal condition, such as termination for the consumer's own non-payment;
+      \item 2 trivial mentions of a change;
+      \item 9 that look unfair under the knowledge-base criteria although the experts labelled them fair, for example ``content that violates any of ebay's policies may be deleted at ebay's discretion''. These are possible annotation inconsistencies.
+    \end{itemize}
+  \item \textbf{Missed clauses (28).}
+    \begin{itemize}
+      \item 14 were found by the model but removed by the gate because they had few precedents, for example 5 exclusions of liability for third-party sites or content;
+      \item 2 were given the wrong category and then gated;
+      \item 12 were judged fair by the model. Of these, 6 are clear errors, such as a one-year limit for bringing claims judged ``common and generally accepted''. Another 3 are notification sentences belonging to a unilateral-change clause. The last 3 are labelled unfair although they are mutual or favour the consumer, such as ``you may terminate your duolingo account at any time''.
+    \end{itemize}
+  \item \textbf{Wrong category (15)}, mostly unilateral termination versus unilateral change, on sentences that let the provider ``modify or discontinue'' a service, where the two categories overlap.
+\end{itemize}
+
+Two lessons follow. First, half of the missed clauses are a direct cost of the gate. Second, part of the disagreement lies with the annotation, which labels only the core sentence of a clause and is occasionally inconsistent.
+
+\subsection{Limits of this evaluation}
+
+The automatic checks show that the explanations are grounded and faithful. They do not show that the legal reasoning is correct: that needs a review by legal experts. We had planned a human rating of a sample of explanations but did not carry it out, and Section~\ref{sec:ethics-conditions} lists such a review as the first condition before any deployment. Gold rationales per sentence, as annotated for ToS-100 by Ruggeri et al.~\citep{ruggeri2022memory}, would also allow an automatic check of correctness.

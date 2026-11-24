@@ -1,0 +1,36 @@
+\section{Introduction}
+\label{sec:intro}
+
+When we create an account on an online service, we accept its Terms of Service, usually without reading them. These contracts are drafted by the provider and accepted as they are, and they often contain clauses that the law considers potentially unfair:
+\begin{itemize}
+  \item the provider may change the contract at any time;
+  \item it may close an account without giving reasons;
+  \item it excludes its liability for lost data;
+  \item every dispute must go to an arbitrator in another country.
+\end{itemize}
+EU consumer law (Directive 93/13/EEC~\citep{dir93}) protects consumers against such terms, but protection depends on someone noticing them. Consumers agree but do not read, consumer organisations have the competence to act but lack the resources, and businesses keep using unlawful clauses~\citep{slides_claudette}.
+
+Claudette~\citep{lippi2019claudette} showed that potentially unfair clauses can be detected automatically, and its data became the UNFAIR-ToS benchmark~\citep{chalkidis2022lexglue}. The best detectors are now fine-tuned language models that output a label. A label, however, cannot be checked or contested: a legal expert does not only recognise an unfair clause, she explains \emph{why} it is unfair by pointing to the rule it violates and to similar cases. Earlier work injected legal rationales into neural models through memory networks~\citep{ruggeri2022memory}. Retrieval-Augmented Generation~\citep{lewis2020rag} offers a more direct route. A language model reads the relevant legal knowledge before deciding and cites it, so that every explanation can be traced to its sources.
+
+\paragraph{Goals.} The project pursued the four core goals and two extensions of our initial report, all completed:
+\begin{enumerate}[label=\textbf{G\arabic*.}]
+  \item \textbf{Legal knowledge base:} category definitions, legal rationales, provisions and expert-labelled examples, with documented sources (Section~\ref{sec:kb}).
+  \item \textbf{RAG system} that outputs a verdict, the categories and an explanation citing the retrieved evidence (Section~\ref{sec:systems}).
+  \item \textbf{Evaluation} against a fine-tuned Legal-BERT, a plain LLM and classical baselines, including the quality, faithfulness and cost of the explanations (Sections~\ref{sec:results} and~\ref{sec:explanations}).
+  \item \textbf{Ethical and legal analysis} of the system (Section~\ref{sec:ethics}).
+\end{enumerate}
+\begin{enumerate}[label=\textbf{E\arabic*.}]
+  \item \textbf{Multilingual fairness:} does the system protect consumers equally in English, German, Italian and Polish? (Section~\ref{sec:multilingual}).
+  \item \textbf{Demo:} a web application that shows the verdict, the explanation and the evidence (Section~\ref{sec:demo}).
+\end{enumerate}
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item A structured legal knowledge base of 5,584 documents, in which every item has an id that explanations must cite.
+  \item A RAG system whose citations are checked against what was retrieved, together with an \emph{evidence gate}: a transparent rule that keeps a flag only when expert-labelled precedents support it. The gate raises macro-F1 from 71.3 to 79.4, statistically on par with fine-tuned Legal-BERT, without training the language model.
+  \item An evaluation of the explanations that separates \emph{grounding} (they cite legal sources consistent with the verdict), \emph{faithfulness} (the cited evidence drives the decision) and \emph{correctness} (the verdict is right). The explanations are grounded and faithful, but grounding does not imply correctness.
+  \item A replication of every experiment with an open-weight model on a university GPU cluster, and a group-fairness analysis across four languages.
+  \item A web demo, and an ethical and legal analysis tied to the measured behaviour of the system.
+\end{itemize}
+
+All code, data processing, predictions and evaluation reports are in the repository; every number in this report can be recomputed from the saved files.

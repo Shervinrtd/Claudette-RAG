@@ -1,0 +1,29 @@
+\section{Conclusions}
+\label{sec:conclusion}
+
+We set out to detect potentially unfair clauses in Terms of Service \emph{with reasons}, and to check whether the protection is the same in every language. The answers are positive, with qualifications.
+
+\begin{itemize}
+  \item \textbf{Accuracy.} A RAG system with an evidence gate, without any training of the language model, reaches 79.4 macro-F1 on UNFAIR-ToS. This is statistically on par with fine-tuned Legal-BERT, and it finds 14.5 points more unfair clauses than TF-IDF. Retrieval alone is not enough: the model keeps flagging sentences because of their topic. The gate, a transparent rule based on expert-labelled precedents, makes the difference (+8.1 macro-F1).
+  \item \textbf{Explanations.} Every flag cites legal sources, and no source is invented. The citations are faithful, in the sense that removing them changes the verdict three times more often than removing other evidence. But wrong flags are cited almost as convincingly as correct ones. Grounding and faithfulness are necessary for a trustworthy explanation, not sufficient; the expert precedents are the better signal of correctness.
+  \item \textbf{Robustness across models.} An open-weight model reproduces every result, including the choice of the gate, which shows that the findings do not depend on one commercial model and that the system can run on infrastructure its user controls.
+  \item \textbf{Fairness across languages.} With multilingual retrieval and a multilingual model, consumers reading German, Italian or Polish contracts receive about the same protection as English readers. English-only models give them almost none. German is consistently the lowest and should be monitored.
+\end{itemize}
+
+\paragraph{Limitations.}
+\begin{itemize}
+  \item The legal correctness of the explanations was not reviewed by legal experts.
+  \item The system reads one sentence at a time, while the Directive judges a term in the context of the whole contract.
+  \item The gate trades recall for precision, a value choice that a deployer should make together with those affected.
+  \item The test sets are small for the rare categories, and the multilingual set covers four languages and 10 companies.
+  \item Robustness to adversarial text, such as instructions hidden in a contract, was not tested.
+\end{itemize}
+
+\paragraph{Future work.} The most useful next steps are:
+\begin{itemize}
+  \item a review of the explanations by legal experts, possibly with the gold rationales of ToS-100~\citep{ruggeri2022memory};
+  \item a user study on whether the precedents and the borderline list help people catch wrong verdicts;
+  \item context beyond the single sentence, for example the neighbouring sentences of a clause;
+  \item the privacy category of the multilingual corpus, connecting the system to the GDPR work of Claudette;
+  \item adversarial tests and a larger multilingual test set.
+\end{itemize}

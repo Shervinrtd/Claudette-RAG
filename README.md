@@ -445,6 +445,16 @@ Limits of the demo:
 - HTML escaping;
 - the no-verdict case.
 
+## Final report
+
+The final report is written in LaTeX: `report/final_report.tex`, with one file per section in `report/sections/` and the bibliography in `report/references.bib`. The figures are drawn from the saved results and the report is compiled with:
+
+```powershell
+.\.venv\Scripts\python scripts\report_figures.py      # report/figures/*.pdf from results/
+cd report
+latexmk -pdf final_report.tex                          # -> report/final_report.pdf (not tracked by git)
+```
+
 ## Notebooks
 
 | Notebook | Content |
@@ -463,4 +473,4 @@ Limits of the demo:
 - [x] Phase 6: multilingual fairness (extension): open-weight replication on the DISI cluster, fairness by language
 - [x] Phase 7: demo (extension): web app for clauses and whole documents (`scripts/demo.py`)
 - [x] Phase 8: ethical and legal analysis (`report/sections/ethics_law.tex`; standalone draft: `latexmk -pdf ethics_law.tex` in `report/`)
-- [ ] Phase 9: final report
+- [x] Phase 9: final report (`report/final_report.tex`)

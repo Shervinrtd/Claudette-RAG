@@ -1,0 +1,82 @@
+% Final report of the project (Phase 9). Compile from the report/ folder:
+%     latexmk -pdf final_report.tex
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+
+\captionsetup{font=small, labelfont=bf}
+\setlist{itemsep=2pt, topsep=4pt}
+\renewcommand{\arraystretch}{1.15}
+\graphicspath{{figures/}}
+
+% reference to another section, used by the ethics section (also compiled on its own)
+\newcommand{\xref}[1]{~(Section~\ref{#1})}
+
+\title{\textbf{Claudette-RAG}\\[4pt]\textbf{Explainable and Fair Detection of Unfair Clauses}\\\textbf{in Terms of Service with Retrieval-Augmented LLMs}\\[8pt]
+\large Final Report -- Ethics in Artificial Intelligence}
+
+\author{
+\begin{tabular}{c}
+Alireza Shahidiani \\
+alireza.shahidiani@studio.unibo.it \\
+Matr.\ 0001154402
+\end{tabular}
+\and
+\begin{tabular}{c}
+Kiana Alian \\
+kiana.alian@studio.unibo.it \\
+Matr.\ 0001153711
+\end{tabular}
+}
+
+\date{University of Bologna -- Master in Artificial Intelligence -- A.Y.\ 2025/2026\\[2pt]
+Code: \url{https://github.com/Shervinrtd/Claudette-RAG}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Online Terms of Service often contain clauses that are potentially unfair to consumers under EU consumer law, such as unilateral changes, broad limitations of liability or mandatory arbitration. Consumers do not read them, and consumer organisations lack the resources to check them at scale. Detectors such as Claudette find these clauses automatically, but a label without reasons is hard to trust and impossible to contest.
+
+We build a Retrieval-Augmented Generation (RAG) system that detects potentially unfair clauses \emph{and explains why}. For each sentence it retrieves, from a legal knowledge base we built, the most similar clauses labelled by legal experts, legal rationales and the provisions of Directive 93/13/EEC they rely on. A language model then gives a verdict with an explanation that must cite the retrieved items. An \emph{evidence gate} keeps a flag only if enough expert-labelled precedents support it.
+
+On the UNFAIR-ToS test set, the system reaches 79.4 macro-F1 (95\% interval 73.3--84.0), with 82.3\% precision and 83.7\% recall. This is statistically on par with a fine-tuned Legal-BERT and finds 14.5 points more unfair clauses than TF-IDF. Every flag cites legal sources, and no citation is invented. Removing the cited evidence changes the verdict three times more often than removing other evidence. However, wrong flags are justified almost as convincingly as correct ones: grounding is not correctness. An open-weight model (Qwen3.6-27B) reproduces every finding. On a multilingual corpus, the system protects consumers equally in English, German, Italian and Polish, where English-only models find almost nothing. We complete the work with a web demo and an analysis of the system under consumer law, the AI Act, the GDPR, fundamental rights, the Trustworthy AI guidelines and the main ethical theories.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/data_kb}
+\input{sections/systems}
+\input{sections/results}
+\input{sections/explanations}
+\input{sections/multilingual}
+\input{sections/demo}
+\input{sections/ethics_law}
+\input{sections/conclusion}
+\input{sections/contributions}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}

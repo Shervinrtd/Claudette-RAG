@@ -1,0 +1,49 @@
+\section{Background}
+\label{sec:background}
+
+\subsection{Unfair terms in consumer contracts}
+
+Under Article~3(1) of Directive 93/13/EEC~\citep{dir93}, a contractual term that has not been individually negotiated is unfair if, contrary to the requirement of good faith, it causes a significant imbalance in the parties' rights and obligations to the detriment of the consumer. Pre-drafted terms, such as online Terms of Service, are by definition not negotiated (Article~3(2)). The Annex of the Directive gives an indicative list of terms that \emph{may} be unfair, and unfair terms do not bind the consumer (Article~6(1)). Since only a court can decide whether a term is unfair, automatic detectors flag terms as \emph{potentially} unfair.
+
+The Claudette project~\citep{lippi2019claudette} defined eight categories of potentially unfair clauses in online Terms of Service, together with criteria that distinguish clearly fair, potentially unfair and clearly unfair terms (Table~\ref{tab:categories}). The categories are not exclusive: a sentence can belong to several.
+
+\begin{table}[ht]
+\centering\small
+\caption{The eight categories of potentially unfair clauses~\citep{lippi2019claudette}, with the number of unfair sentences in the UNFAIR-ToS training and test sets.}
+\label{tab:categories}
+\begin{tabularx}{\textwidth}{@{}p{3.3cm}X rr@{}}
+\toprule
+Category & A clause is potentially unfair if it\ldots & Train & Test \\
+\midrule
+Limitation of liability & excludes or limits the provider's liability for damages & 191 & 38 \\
+Unilateral termination & lets the provider suspend or terminate the service or the contract & 139 & 38 \\
+Unilateral change & lets the provider change the contract or the service on its own & 122 & 38 \\
+Contract by using & binds the consumer to the terms by the mere use of the service & 76 & 23 \\
+Content removal & lets the provider delete or modify the user's content & 73 & 13 \\
+Choice of law & makes a law other than the consumer's apply to the contract & 39 & 13 \\
+Jurisdiction & sends disputes to courts other than those of the consumer's residence & 34 & 16 \\
+Arbitration & requires disputes to be settled by arbitration & 28 & 7 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Automatic detection and explanation}
+
+Claudette trained classifiers on 50 Terms of Service annotated sentence by sentence by legal experts~\citep{lippi2019claudette}. The same data is the UNFAIR-ToS task of the LexGLUE benchmark~\citep{chalkidis2022lexglue}, where fine-tuned legal language models such as Legal-BERT~\citep{chalkidis2020legalbert} reach 96.0 micro-F1 and 83.0 macro-F1. Ruggeri et al.~\citep{ruggeri2022memory} added legal rationales to the classifier through memory networks, both to improve detection and to explain decisions. They derived the rationales for five categories from the annotators' reasoning, and our knowledge base adapts them. Drawzeski et al.~\citep{drawzeski2021} extended the annotation to 25 Terms of Service in English, German, Italian and Polish, with a level of unfairness per sentence; we use this corpus for the multilingual evaluation.
+
+Retrieval-Augmented Generation~\citep{lewis2020rag} combines a retriever, which selects relevant documents from an external collection, with a generator that conditions its output on them. For legal classification, RAG makes the knowledge used by the model explicit and inspectable, and lets the explanation point to it. It also raises two questions that our evaluation addresses:
+\begin{itemize}
+  \item \textbf{Faithfulness:} does the cited evidence actually drive the decision?
+  \item \textbf{Calibration of trust:} does a well-cited explanation make a wrong verdict more believable?
+\end{itemize}
+
+\subsection{Group fairness}
+
+The course defines several criteria of group fairness for a classifier~\citep{slides_fairness}:
+\begin{itemize}
+  \item \textbf{statistical parity:} the same share of positive predictions in every group;
+  \item \textbf{equality of opportunity:} the same true positive rate, i.e.\ recall;
+  \item \textbf{equal false positive rates;}
+  \item \textbf{conditional use error:} the same precision.
+\end{itemize}
+Equality of opportunity and equal false positive rates together are \emph{equalized odds}. These criteria can conflict when the base rates of the groups differ, so several must be read together. In our multilingual analysis the groups are the languages of the contracts, and the relevant positive outcome for a consumer is that an unfair clause is found: equality of opportunity is therefore the primary criterion.

@@ -1,0 +1,28 @@
+\section{Employed technologies}
+\label{sec:technologies}
+
+This section gives a brief overview of the technologies used in the project.
+
+\subsection{Python and the project package}
+The project is written in Python (3.10 or newer) as an installable package, \texttt{claudette\_rag}, with command-line scripts for every step. Dependencies are listed in \texttt{requirements.txt} and installed with \texttt{pip} in a virtual environment. The package is installed in editable mode, so the scripts always use the current code. Unit tests are written with \texttt{pytest}.
+
+\subsection{Hugging Face datasets, Transformers and PyTorch}
+The datasets are downloaded from the Hugging Face Hub with the \texttt{datasets} library: UNFAIR-ToS from LexGLUE and the multilingual Claudette corpus. Legal-BERT is fine-tuned with PyTorch and Hugging Face Transformers, on a laptop GPU (NVIDIA RTX 4050, 6\,GB) and again on the cluster.
+
+\subsection{Sentence-transformers and bge-m3}
+The retriever embeds sentences and knowledge-base documents with the multilingual model BAAI/bge-m3~\citep{chen2024bgem3} through the \texttt{sentence-transformers} library. The embeddings are stored as a NumPy array and searched with exact cosine similarity.
+
+\subsection{scikit-learn}
+scikit-learn provides the TF-IDF + linear SVM baseline and serves as an independent check of our implementation of the evaluation metrics.
+
+\subsection{OpenAI API}
+The main language model, \texttt{gpt-4.1-mini-2025-04-14}~\citep{openai2025gpt41}, is called through the OpenAI API with \emph{structured outputs}: the answer must follow a strict JSON schema, so it can always be parsed. The API reuses the identical system prompt of consecutive requests from a cache, which reduces cost. The API key is kept in a local \texttt{.env} file that is never committed.
+
+\subsection{vLLM and Slurm on the DISI cluster}
+The open-weight model Qwen3.6-27B-FP8~\citep{qwen2026} is served with vLLM~\citep{kwon2023vllm}, which exposes the same interface as the OpenAI API: the same client code calls either model by changing one address. The experiments run as Slurm jobs on one NVIDIA L40 (48\,GB) of the DISI cluster for education of the University of Bologna. The setup and job scripts are in \texttt{hpc/}.
+
+\subsection{Gradio}
+The demo is a web application built with Gradio, which turns Python functions into a browser interface.
+
+\subsection{Git, matplotlib and LaTeX}
+The code is versioned with Git on GitHub. The figures are drawn with matplotlib from the saved results, and this report is written in LaTeX.

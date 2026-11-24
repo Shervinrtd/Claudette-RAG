@@ -1,0 +1,50 @@
+\section{Reproducibility}
+\label{sec:reproducibility}
+
+To reproduce the results, clone the repository and install the dependencies (Python 3.10 or newer). A GPU is recommended for Legal-BERT and for building the embedding index. The language-model runs need an OpenAI API key in a local \texttt{.env} file, or an OpenAI-compatible server for open-weight models. Every script prints an estimated cost before calling the API (\texttt{--dry-run}), and the README gives the details of each step. The commands below use Linux paths; on Windows, use \texttt{.venv\textbackslash Scripts\textbackslash python}.
+
+{\small
+\begin{verbatim}
+git clone https://github.com/Shervinrtd/Claudette-RAG.git
+cd Claudette-RAG
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt   # PyTorch with CUDA: see README
+cp .env.example .env                                  # then add OPENAI_API_KEY
+
+# data and knowledge base
+python scripts/download_data.py
+python scripts/download_multilingual.py
+python scripts/prepare_multilingual_eval.py
+python scripts/build_knowledge_base.py
+python scripts/build_index.py          # bge-m3 embeddings (~2.3 GB download)
+python scripts/eval_retrieval.py       # retrieval quality and kNN vote
+
+# baselines (Section 6)
+python scripts/baseline_tfidf.py
+python scripts/train_bert.py           # Legal-BERT, seeds 1 2 3
+python scripts/run_llm.py              # plain LLM on the test set (~$0.90)
+
+# RAG system: choices on validation, then one test run (~$2.30 and ~$1.65)
+python scripts/run_rag.py
+python scripts/gate_rag.py rag_gpt-4.1-mini-2025-04-14_e8r5p6_validation
+python scripts/run_rag.py --split test
+python scripts/gate_rag.py rag_gpt-4.1-mini-2025-04-14_e8r5p6_test
+python scripts/compare_systems.py
+
+# explanations (Section 7)
+python scripts/explanation_quality.py
+python scripts/error_analysis.py
+python scripts/faithfulness.py         # ~$0.80
+
+# open-weight replication and multilingual fairness (Section 8), on the cluster
+sbatch hpc/run.sbatch all              # see hpc/README.md
+python scripts/multilingual_fairness.py --model Qwen/Qwen3.6-27B-FP8
+
+# demo, figures and this report
+python scripts/demo.py                 # http://127.0.0.1:7860
+python scripts/report_figures.py
+cd report && latexmk -pdf final_report.tex
+\end{verbatim}
+}
+
+The tests run with \texttt{python -m pytest}. Two sources of variation remain: the OpenAI API is not fully deterministic even at temperature 0 with a fixed seed (98.3\% of repeated answers were identical), and the fine-tuning of Legal-BERT on a GPU varies slightly between runs. The saved answers in \texttt{results/llm\_logs/} make every evaluation reproducible without calling the API again.

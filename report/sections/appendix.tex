@@ -1,0 +1,139 @@
+\appendix
+
+\section{Algorithms}
+\label{app:algorithms}
+
+The main procedures of the system are listed here for reference.
+
+\begin{algorithm}[H]
+\caption{Classification of one sentence: RAG with the evidence gate}
+\label{alg:rag}
+\DontPrintSemicolon
+\KwData{Sentence $s$; index of the knowledge base; language model $M$; gate setting $k=8$, $m=3$}
+\KwResult{Categories $C$ (empty: not flagged), explanation $e$, valid citations $V$}
+$X \leftarrow$ the 8 training sentences most similar to $s$, with their expert labels\;
+$R \leftarrow$ the 5 rationales most similar to $s$\;
+$P \leftarrow$ the provisions linked to $R$ (at most 6)\;
+$(e, \textit{cited}, \textit{unfair}, C_M) \leftarrow M(\text{system prompt}, X, R, P, s)$ \tcp*{strict JSON answer}
+\lIf{not \textit{unfair}}{$C_M \leftarrow \emptyset$}
+$V \leftarrow \textit{cited} \cap \text{ids}(X \cup R \cup P)$ \tcp*{invented ids are reported and ignored}
+$C \leftarrow \emptyset$\;
+\ForEach{category $c \in C_M$}{
+  $\textit{votes} \leftarrow |\{x \in \text{the } k \text{ most similar of } X : c \in \text{labels}(x)\}|$\;
+  \lIf{$\textit{votes} \ge m$}{$C \leftarrow C \cup \{c\}$}
+}
+\Return{$C, e, V$}\;
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Choice of the gate setting on validation (rule fixed in advance)}
+\label{alg:gate-choice}
+\DontPrintSemicolon
+\KwData{Validation answers of the RAG system; minimum recall $r_{\min} = 0.80$}
+\KwResult{The setting $(k, m)$ used unchanged on the test set and on the multilingual data}
+$G \leftarrow \emptyset$\;
+\ForEach{$k \in \{3, 5, 8\}$, $m \in \{1, 2, 3\}$ with $m \le k$}{
+  apply the gate with $(k, m)$ to every validation answer\;
+  $G \leftarrow G \cup \{(k, m, \text{macro-F1}, \text{recall})\}$\;
+}
+$E \leftarrow \{g \in G : g.\text{recall} \ge r_{\min}\}$\;
+\leIf{$E \neq \emptyset$}{\Return{the setting of $E$ with the highest macro-F1}}{\Return{the setting of $G$ with the highest recall}}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Faithfulness test of the citations}
+\label{alg:faithfulness}
+\DontPrintSemicolon
+\KwData{Sentences judged unfair by the RAG system, with their retrieved and cited items}
+\KwResult{Share of verdicts that flip when the cited items are removed, against a control; McNemar test}
+\ForEach{such sentence $s$}{
+  $D \leftarrow$ the cited items of $s$\;
+  $D' \leftarrow$ for each type (example, rationale, provision), as many uncited items of that type as $D$ contains, drawn at random\;
+  $a_s \leftarrow$ [verdict is fair when the prompt omits $D$]\;
+  $b_s \leftarrow$ [verdict is fair when the prompt omits $D'$]\;
+}
+compare $\{a_s\}$ and $\{b_s\}$ with an exact McNemar test on the discordant sentences\;
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Document mode of the demo: model calls only where the gate could keep a category}
+\label{alg:document}
+\DontPrintSemicolon
+\KwData{Text of a Terms of Service; gate setting $(k, m)$}
+\KwResult{A verdict for every sentence, identical to Algorithm~\ref{alg:rag}}
+split the text into paragraphs and sentences (rules for abbreviations in four languages); skip headings\;
+embed all sentences at once and retrieve their knowledge\;
+\ForEach{sentence $s$}{
+  \eIf{some category has at least $m$ votes among the $k$ most similar training sentences}{
+    run Algorithm~\ref{alg:rag} on $s$\;
+  }{
+    $C \leftarrow \emptyset$ \tcp*{the gate would remove any category the model proposed}
+  }
+}
+\end{algorithm}
+
+
+\section{The prompt of the RAG system}
+\label{app:prompt}
+
+The system prompt is identical for every sentence. It starts with the task and the eight category cards, of which the first is shown here, followed by the rules, the instructions on the retrieved knowledge and the answer schema. The plain LLM baseline uses the same prompt without the section ``Retrieved knowledge'' and without the field \texttt{cited\_ids}.
+
+{\small
+\begin{verbatim}
+You are an expert in EU consumer protection law. You review single sentences
+taken from online Terms of Service and decide whether each sentence contains a
+potentially unfair clause under Council Directive 93/13/EEC: a standard term
+that, contrary to the requirement of good faith, causes a significant imbalance
+in the parties' rights and obligations to the detriment of the consumer.
+
+There are 8 categories of potentially unfair clauses:
+
+[ltd] Limitation of liability: Clauses that limit or exclude the provider's
+duty to pay damages for certain losses or under certain conditions.
+  - Potentially unfair if: The clause excludes or limits liability for broad
+    categories of losses or causes (for example malware, data loss, suspension
+    or unavailability of the service), or uses a blanket phrase such as "to the
+    fullest extent permitted by law".
+  - Clearly unfair if: The clause reduces, limits or excludes liability for
+    physical injury, intentional damage or gross negligence.
+  - NOT unfair (clearly fair) if: The clause explicitly confirms the
+    liabilities that cannot be excluded, such as liability for intentional
+    breach, gross negligence, death or personal injury, or product liability.
+[... seven more category cards ...]
+
+Rules:
+- A sentence can belong to several categories at the same time, or to none.
+- A sentence is unfair if, for at least one category, it is potentially unfair
+  or clearly unfair. A sentence about one of these topics that is clearly fair
+  (for example, it lets consumers go to the courts of their own country) is NOT
+  unfair.
+- Most sentences of a contract are fair: definitions, descriptions of the
+  service, contact details, obligations that protect users. Do not flag a
+  sentence only because it mentions a topic.
+- The sentence may be lowercased and tokenized (for example "terms ." or
+  "you 're").
+
+Retrieved knowledge:
+Before each sentence you receive knowledge retrieved from a legal knowledge
+base, selected because its wording is similar to the sentence:
+- sentences from other Terms of Service, with the labels given by legal
+  experts ("fair", or the codes of the unfair categories);
+- legal rationales: when a kind of clause is or is not unfair;
+- the legal provisions those rationales are based on.
+Every item has an id in square brackets. Use the knowledge as evidence, but
+judge the sentence itself: a retrieved item can be similar in wording and
+different in meaning, and some items are not relevant. Similar sentences that
+experts labelled fair are evidence that the sentence may be fair too.
+
+Answer with a JSON object:
+- "explanation": one or two sentences explaining your decision;
+- "cited_ids": the ids of the retrieved items that support your decision (for
+  an unfair sentence, include the rationales or provisions that apply); only
+  ids that appear in the retrieved knowledge; empty if none is relevant;
+- "unfair": true or false;
+- "categories": the list of category codes that apply (choose from ltd, ter,
+  ch, cr, use, law, j, a); empty if the sentence is fair.
+\end{verbatim}
+}
+
+The user message lists the retrieved knowledge in three blocks, each item with its id (as in Figure~\ref{fig:kb-example}), followed by the line \texttt{Sentence: <sentence>}.

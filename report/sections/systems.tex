@@ -94,6 +94,108 @@ The values of $k$ and $m$ were chosen on the validation set by a rule fixed in a
 
 The multilingual evaluation needed about 10,000 sentences per system, more than our API budget allowed. We therefore replicated the whole pipeline with an open-weight model, Qwen3.6-27B in FP8~\citep{qwen2026}, served with vLLM~\citep{kwon2023vllm} on one NVIDIA L40 (48\,GB) of the DISI cluster of the University of Bologna. The setup keeps the same prompts, answer schema, knowledge base, gate rule and evaluation, and switches off the model's ``thinking'' mode so that it answers directly, like gpt-4.1-mini. The replication serves two purposes: all comparisons across languages use one model, and it tests whether our findings depend on a particular commercial model. It also keeps the data on infrastructure the university controls, which Section~\ref{sec:ethics-gdpr} discusses.
 
-\subsection{Implementation}
+\subsection{Implementation and code organisation}
+\label{sec:code}
 
-The code is a Python package (\texttt{src/claudette\_rag}) with command-line scripts and 54 unit tests. Every answer of a language model is appended to a log as soon as it arrives, so an interrupted run resumes without paying twice. The predictions, explanations with their retrieved and cited ids, and evaluation reports of every run are saved in the repository. Choices were made on the validation set, and the test set was used once per system. The main system (full RAG with the gate) was declared before its test run.
+Figure~\ref{fig:folders} shows the structure of the repository:
+\begin{itemize}
+  \item \texttt{knowledge\_base/}: the knowledge base, written by hand;
+  \item \texttt{src/claudette\_rag/}: the logic, in the Python package;
+  \item \texttt{scripts/}: one command-line entry point for each step of the experiments;
+  \item \texttt{results/}: everything the experiments produce.
+\end{itemize}
+Table~\ref{tab:modules} describes the modules of the package. The systems are built from shared parts, so that a comparison changes only what it means to compare. For example, the plain LLM and the RAG system share the same prompt and answer handling (\texttt{llm.py}), and every system is scored by the same evaluation code (\texttt{evaluation.py}). The demo calls the same functions as the experiments, through \texttt{pipeline.py}.
+
+\begin{figure}[ht]
+\centering\small
+\begin{minipage}[t]{0.48\textwidth}
+\begin{verbatim}
+Claudette-RAG/
+|-- knowledge_base/   legal KB (YAML)
+|   |-- legal_provisions.yaml
+|   |-- categories.yaml
+|   |-- rationales.yaml
+|   `-- sources.yaml
+|-- src/claudette_rag/  Python package
+|-- scripts/            entry points
+|-- tests/              unit tests (pytest)
+|-- hpc/                cluster setup, Slurm job
+|-- notebooks/          data exploration
+|-- data/               raw and processed data
+|                       (not tracked by Git)
+\end{verbatim}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\begin{verbatim}
+|-- results/
+|   |-- predictions/   labels per sentence
+|   |-- explanations/  explanation, cited and
+|   |                  retrieved ids
+|   |-- llm_logs/      raw answers, tokens
+|   `-- *.json         evaluation reports
+|-- report/            this report (LaTeX)
+|-- requirements.txt
+|-- pyproject.toml
+`-- README.md
+\end{verbatim}
+\end{minipage}
+\caption{The project folder structure.}
+\label{fig:folders}
+\end{figure}
+
+\begin{table}[ht]
+\centering\small
+\caption{Modules of the package \texttt{src/claudette\_rag} and the scripts that use them.}
+\label{tab:modules}
+\begin{tabularx}{\textwidth}{@{}p{2.9cm}YP{4.4cm}@{}}
+\toprule
+Module & Responsibility & Main scripts \\
+\midrule
+\texttt{text.py} & Normalisation of text to the UNFAIR-ToS format, and back for display & data preparation, demo \\
+\texttt{knowledge\_base.py} & Loading and validating the YAML knowledge base, export as documents & \texttt{build\_knowledge\_base.py} \\
+\texttt{retrieval.py} & Embedding model, index, search by document type, kNN vote & \texttt{build\_index.py}, \texttt{eval\_retrieval.py} \\
+\texttt{llm.py} & System prompt, answer schema, model calls with retries and resumable logs, parsing, cost & \texttt{run\_llm.py}, \texttt{run\_rag.py} \\
+\texttt{rag.py} & RAG prompt, citation check, evidence gate and its selection rule, faithfulness controls & \texttt{run\_rag.py}, \texttt{gate\_rag.py}, \texttt{faithfulness.py} \\
+\texttt{bert.py} & Fine-tuning and prediction of Legal-BERT & \texttt{train\_bert.py} \\
+\texttt{evaluation.py} & Metrics, bootstrap intervals, paired bootstrap, McNemar test, fairness rates by group & \texttt{evaluate.py}, \texttt{compare\_systems.py}, \texttt{multilingual\_fairness.py} \\
+\texttt{pipeline.py} & The complete system for one clause or a document; sentence splitting & \texttt{demo.py} \\
+\texttt{demo.py} & Display of the results and the web interface & \texttt{demo.py} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Figure~\ref{fig:workflow} shows how the scripts and data interact in the experiments.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  n/.style={draw=black!55, rounded corners=2pt, align=center, font=\footnotesize, inner sep=3pt, minimum height=8mm},
+  d/.style={n, fill=black!4},
+  arr/.style={-{Stealth[length=1.8mm]}, black!65}]
+\node[d] (raw) at (0,0) {UNFAIR-ToS and\\multilingual corpus\\(\texttt{data/raw})};
+\node[d] (yaml) at (0,-2.2) {Knowledge base\\(\texttt{knowledge\_base/*.yaml})};
+\node[n] (bkb) at (4.0,-2.2) {\texttt{build\_knowledge\_base.py}\\documents};
+\node[n] (idx) at (4.0,-3.9) {\texttt{build\_index.py}\\bge-m3 index};
+\node[n] (base) at (8.0,0) {Baselines: \texttt{baseline\_tfidf.py},\\\texttt{run\_llm.py}, \texttt{train\_bert.py}};
+\node[n] (rag) at (8.0,-2.2) {RAG: \texttt{run\_rag.py}\\gate: \texttt{gate\_rag.py}};
+\node[n] (demo) at (8.0,-3.9) {Demo: \texttt{demo.py}\\(\texttt{pipeline.py})};
+\node[d] (res) at (12.2,-1.1) {\texttt{results/}: predictions,\\explanations, logs};
+\node[n] (eval) at (12.2,-3.0) {\texttt{evaluate.py}, \texttt{compare\_systems.py},\\\texttt{explanation\_quality.py},\\\texttt{faithfulness.py},\\\texttt{multilingual\_fairness.py}};
+\node[d] (rep) at (12.2,-4.9) {Reports, figures,\\this report};
+\draw[arr] (raw) -- (base);
+\draw[arr] (raw.south east) -- (rag.north west);
+\draw[arr] (yaml) -- (bkb);
+\draw[arr] (bkb) -- (idx);
+\draw[arr] (idx) -- (rag.south west);
+\draw[arr] (idx) -- (demo);
+\draw[arr] (bkb) -- (rag);
+\draw[arr] (base.east) -- (res.north west);
+\draw[arr] (rag.east) -- (res.south west);
+\draw[arr] (res) -- (eval);
+\draw[arr] (eval) -- (rep);
+\end{tikzpicture}
+\caption{Workflow of the experiments: from the data and the knowledge base to the systems, their saved results and the evaluation.}
+\label{fig:workflow}
+\end{figure}
+
+Every answer of a language model is appended to a log as soon as it arrives, so an interrupted run resumes without paying twice. The predictions, the explanations with their retrieved and cited ids, and the evaluation report of every run are saved, and every number in this report can be recomputed from them. The repository has 54 unit tests. Choices were made on the validation set, and the test set was used once per system; the main system (full RAG with the gate) was declared before its test run.

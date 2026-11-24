@@ -20,6 +20,18 @@ def normalize_like_unfair_tos(text: str) -> str:
     return _SPACES.sub(" ", text).strip()
 
 
+def readable(text: str) -> str:
+    """UNFAIR-ToS text -> easier to read: quotes, spaces around punctuation and clitics restored,
+    first letter capitalised (the reverse of normalize_like_unfair_tos, for display only)."""
+    text = re.sub(r"``\s*", '"', text)
+    text = re.sub(r"\s*''", '"', text)
+    text = re.sub(r"\s+([.,;:!?%)\]}])", r"\1", text)
+    text = re.sub(r"([(\[{$])\s+", r"\1", text)
+    text = re.sub(r"\s+('s|'re|'ve|'ll|'d|'m|n't)\b", r"\1", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+/\s+", "/", _SPACES.sub(" ", text)).strip()
+    return text[:1].upper() + text[1:]
+
+
 def squash(text: str) -> str:
     """Keep only lowercase letters and digits: used to find near-duplicate sentences
     regardless of tokenization differences (e.g. "won't" vs "wo n't")."""

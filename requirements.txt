@@ -19,5 +19,8 @@ python-dotenv>=1.0
 transformers>=4.45
 sentence-transformers>=3.0
 
+# Demo (scripts/demo.py)
+gradio>=6.0
+
 # This project's own package (src/claudette_rag), installed in editable mode
 -e .

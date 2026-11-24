@@ -20,7 +20,7 @@ Online Terms of Service (ToS) often contain clauses that are potentially unfair 
 │   └── processed/        # derived data (not tracked by git)
 ├── knowledge_base/       # legal knowledge base (YAML, written by hand)
 ├── notebooks/            # exploration and analysis notebooks
-├── scripts/              # entry-point scripts (download, training, evaluation)
+├── scripts/              # entry-point scripts (download, training, evaluation, demo)
 ├── src/claudette_rag/    # project source code
 ├── report/               # LaTeX report (initial and final) and figures
 ├── results/              # predictions and evaluation reports of every system
@@ -375,6 +375,57 @@ Multilingual evaluation set, 2,270-2,714 sentences and 219-238 unfair ones per l
 
 The multilingual LLM with multilingual retrieval already reaches parity, so the mitigation planned in the proposal (translating the contracts into English before classifying them) is not needed for these systems; it would only matter for the English-only models.
 
+## Demo (Phase 7)
+
+A web application (Gradio) where you paste one clause or a whole Terms of Service and see what the system decided and why. It runs the evaluated system, RAG + evidence gate, through the same functions as the experiments (`src/claudette_rag/pipeline.py`), so what you see is what was measured.
+
+```powershell
+.\.venv\Scripts\python scripts\demo.py                    # gpt-4.1-mini (OpenAI key in .env)
+.\.venv\Scripts\python scripts\demo.py --evidence-only    # no language model: free and offline (kNN baseline)
+.\.venv\Scripts\python scripts\demo.py --model qwen3:8b --base-url http://localhost:11434/v1   # local model (Ollama)
+```
+
+The browser opens at http://127.0.0.1:7860. The index (`scripts/build_index.py`) must exist; without an OpenAI key the demo starts in *Evidence only* mode. Use `--embed-device cpu` to leave the GPU to a local model.
+
+- **Check a clause:** the verdict and, below it:
+  - the model's explanation, and why this kind of clause matters for consumers;
+  - the legal rationales and provisions the model cited, linked to the official texts;
+  - the expert-labelled precedents, with a bar per category showing how many of the 8 most similar clauses have it and where the threshold of the evidence gate is;
+  - every step of the decision, the time and the estimated cost.
+- **Check a document:** every sentence is checked. The page shows:
+  - the flagged clauses (each one expandable to the same details);
+  - the *borderline* ones, which the model flagged but the precedents did not confirm;
+  - the full text with highlights;
+  - a CSV of all verdicts.
+- **About:** what the system is and is not, how it decides, and its measured accuracy (test set, and per language). The numbers are read from `results/` for the model that is running.
+
+Design choices, each motivated by an earlier result:
+
+- **The precedents are shown next to the citations.** Phase 5 showed that wrong flags cite legal sources almost as often as correct ones, while the expert-labelled precedents separate them. So the user gets the evidence that actually discriminates, not only a convincing explanation.
+- **A verdict overruled by the gate is shown as borderline**, not hidden, and "not flagged" is never presented as "fair". The tool supports a human reader (human oversight) instead of replacing them.
+- **A failed model call gives "no verdict"**, never a silent "not flagged". In document mode, these sentences are counted and underlined.
+- **Documents cost about a seventh as much, with identical verdicts.** When no category has 3 of the 8 precedents, the gate would remove whatever the model says, so the model is not asked.
+  - On the test set only 223 of 1,607 sentences need the model (13.9%), and between 12.3% and 14.3% on the four languages of the multilingual set.
+  - None of the skipped sentences was flagged by the evaluated system.
+  - A Terms of Service of 150 sentences costs about $0.02 with gpt-4.1-mini instead of $0.15 (about $0.001 per call in the test run).
+  - A single clause is always sent to the model, so that its reasoning is visible even when the gate overrules it.
+- **Transparency and data:**
+  - the page states that it is an AI system and not legal advice, and which model is running;
+  - the About tab says that, with gpt-4.1-mini, the text is sent to the OpenAI API;
+  - the demo stores nothing, and all text is HTML-escaped before display.
+
+Limits of the demo:
+
+- Text must be pasted; PDF or HTML files are not read.
+- Sentences are split with rules: abbreviations such as "e.g.", "Art.", "U.S.", "z.B." or "np." are handled, unusual layouts may not be.
+- A model other than the two we evaluated uses the gate setting chosen for them (k = 8, m = 3) and has no measured accuracy; the About tab says so.
+
+`tests/test_pipeline.py` checks:
+- the pipeline with a fake embedder and a fake model, including that the document shortcut gives the same verdicts as asking the model about every sentence;
+- the sentence splitter;
+- HTML escaping;
+- the no-verdict case.
+
 ## Notebooks
 
 | Notebook | Content |
@@ -391,4 +442,6 @@ The multilingual LLM with multilingual retrieval already reaches parity, so the 
 - [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
 - [x] Phase 5: evaluation of the explanations (grounding, error analysis, faithfulness, stability)
 - [x] Phase 6: multilingual fairness (extension): open-weight replication on the DISI cluster, fairness by language
-- [ ] Phase 7: demo (extension)
+- [x] Phase 7: demo (extension): web app for clauses and whole documents (`scripts/demo.py`)
+- [ ] Phase 8: ethical and legal analysis
+- [ ] Phase 9: final report

@@ -1,0 +1,97 @@
+{
+  "run": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+  "model": "Qwen/Qwen3.6-27B-FP8",
+  "conditions": {
+    "remove_cited": {
+      "requests": 309,
+      "estimated_cost_usd": 0.0,
+      "all": {
+        "n": 309,
+        "same_labels": 0.7055016181229773,
+        "same_verdict": 0.7961165048543689,
+        "unfair_to_fair": 0.20388349514563106,
+        "mcnemar": {
+          "only_cited_removal_flips": 51,
+          "only_control_flips": 9,
+          "p_value": 3.085035609438902e-08
+        }
+      },
+      "matched control": {
+        "n": 238,
+        "same_labels": 0.6596638655462185,
+        "same_verdict": 0.7478991596638656,
+        "unfair_to_fair": 0.25210084033613445,
+        "mcnemar": {
+          "only_cited_removal_flips": 48,
+          "only_control_flips": 9,
+          "p_value": 1.520195229143262e-07
+        }
+      },
+      "correct": {
+        "n": 163,
+        "same_labels": 0.8159509202453987,
+        "same_verdict": 0.9570552147239264,
+        "unfair_to_fair": 0.04294478527607362,
+        "mcnemar": {
+          "only_cited_removal_flips": 7,
+          "only_control_flips": 0,
+          "p_value": 0.015625
+        }
+      },
+      "wrong": {
+        "n": 146,
+        "same_labels": 0.5821917808219178,
+        "same_verdict": 0.6164383561643836,
+        "unfair_to_fair": 0.3835616438356164,
+        "mcnemar": {
+          "only_cited_removal_flips": 44,
+          "only_control_flips": 9,
+          "p_value": 1.220851017613711e-06
+        }
+      }
+    },
+    "remove_uncited": {
+      "requests": 309,
+      "estimated_cost_usd": 0.0,
+      "all": {
+        "n": 309,
+        "same_labels": 0.8867313915857605,
+        "same_verdict": 0.9320388349514563,
+        "unfair_to_fair": 0.06796116504854369
+      },
+      "matched control": {
+        "n": 238,
+        "same_labels": 0.8613445378151261,
+        "same_verdict": 0.9117647058823529,
+        "unfair_to_fair": 0.08823529411764706
+      },
+      "correct": {
+        "n": 163,
+        "same_labels": 0.9570552147239264,
+        "same_verdict": 1.0,
+        "unfair_to_fair": 0.0
+      },
+      "wrong": {
+        "n": 146,
+        "same_labels": 0.8082191780821918,
+        "same_verdict": 0.8561643835616438,
+        "unfair_to_fair": 0.14383561643835616
+      }
+    },
+    "repeat": {
+      "requests": 300,
+      "estimated_cost_usd": 0.0,
+      "agreement": {
+        "n": 300,
+        "same_labels": 0.9933333333333333,
+        "same_verdict": 0.9933333333333333,
+        "unfair_to_fair": 0.0033333333333333335
+      }
+    }
+  },
+  "wrong_flags_flipped_by_removing_citations": {
+    "flipped": 56,
+    "of_which_fair_for_the_experts": 55
+  },
+  "control_unmatched_sentences": 71
+}

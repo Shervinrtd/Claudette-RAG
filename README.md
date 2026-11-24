@@ -326,7 +326,54 @@ python scripts/train_bert.py --tag hpc --multilingual                # Legal-BER
 python scripts/multilingual_fairness.py --model Qwen/Qwen3.6-27B-FP8 # fairness by language
 ```
 
-Results: to be added.
+### Replication with the open-weight model (English, UNFAIR-ToS test set)
+
+Every experiment of Phases 3-5 was repeated with Qwen3.6-27B, with the same prompts, knowledge base, gate rule and evaluation (1,607 test sentences, choices made on validation):
+
+| System | gpt-4.1-mini: macro-F1 / precision / recall | Qwen3.6-27B: macro-F1 / precision / recall |
+|---|---|---|
+| Plain LLM | 64.2 / 41.3 / 93.6 | 64.2 / 35.9 / 97.1 |
+| RAG, no gate | 71.3 / 55.0 / 93.0 | 71.8 / 53.4 / 95.9 |
+| RAG examples only, no gate | 75.3 / 71.2 / 86.0 | 77.6 / 67.2 / 93.0 |
+| **RAG + evidence gate (main system)** | **79.4 / 82.3 / 83.7** | **79.0 / 79.7 / 84.3** |
+| RAG examples only + gate | 78.9 / 83.7 / 80.8 | 80.2 / 83.0 / 82.6 |
+| Legal-BERT, retrained on the cluster (3 seeds) | 82.8 ± 1.0 / 83.7 ± 1.6 / 81.6 ± 0.9 | |
+
+All the findings hold with a very different model:
+- **Same gate choice.** The validation procedure selects the same setting (k=8, m=3) independently.
+- **Same ablation pattern on validation.** Legal knowledge alone gives the lowest scores (macro-F1 56.2, precision 32.6, below the plain LLM's 34.4 precision), examples alone beat the full RAG (72.9 vs 67.3), and the gate lifts both to about 80.
+- **Same results with the gate.** The two main systems differ by 0.4 macro-F1 (95% interval −2.2 to +1.4); Qwen's precision is slightly lower (−2.6, significant) and the recall is the same. Against Legal-BERT (again retrained, 82.8 macro-F1: the earlier result reproduces) the gap is −2.9 to −5.1 macro-F1 and not significant for any seed, and against TF-IDF the recall is 15.1 points higher (significant).
+- **The explanations are faithful in the same way.** Removing the cited items flips 20.4% of the unfair verdicts, against 6.8% for the control (51 vs 9 discordant sentences, McNemar p = 3e-8); correct flags almost never flip (4.3%), wrong ones often (38.4%), and 55 of the 56 wrong flags that disappear without their citations are fair for the experts: the retrieved evidence caused them.
+- **Same "grounding is not correctness" pattern.** Without the gate, wrong flags cite legal evidence consistent with the category they claim almost as often as correct ones (93% vs 96%), and the expert precedents separate them (44% vs 86%).
+- **Stable and well-formed answers.** 99.3% of 300 repeated prompts give the same labels; 1-4 answers per run are not valid JSON (counted as fair).
+- **Cost:** no API cost, but GPU time. The English stage (about 14,800 requests) took 3 h 50 min on one L40, about 42 s per RAG request with 32 in parallel; the weights are stored in FP8 but computed in 16-bit on this GPU.
+
+```bash
+python scripts/compare_systems.py --reference gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test
+python scripts/explanation_quality.py --run rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test --final gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test
+```
+
+### Fairness by language
+
+Multilingual evaluation set, 2,270-2,714 sentences and 219-238 unfair ones per language (full table: `results/multilingual_fairness_Qwen-Qwen3.6-27B-FP8.txt`):
+
+| System | Recall en / de / it / pl | False-alarm rate en / de / it / pl | Macro-F1 en / de / it / pl | Recall ratio to English |
+|---|---|---|---|---|
+| Legal-BERT (English only) | 72.6 / 0.0 / 0.0 / 0.0 | 1.3 / 0.0 / 0.0 / 0.0 | 76.0 / 10.5 / 10.6 / 10.6 | 0.00 |
+| TF-IDF + SVM (English only) | 55.3 / 0.5 / 0.0 / 0.0 | 1.0 / 0.0 / 0.0 / 0.0 | 66.7 / 11.6 / 10.6 / 10.6 | 0.00-0.01 |
+| kNN vote (bge-m3) | 70.3 / 64.4 / 69.4 / 68.1 | 3.4 / 4.1 / 3.5 / 3.4 | 65.5 / 58.9 / 61.6 / 61.2 | 0.92-0.99 |
+| Plain LLM (Qwen3.6-27B) | 95.9 / 91.8 / 92.1 / 92.0 | 13.3 / 13.7 / 14.2 / 12.4 | 64.7 / 64.0 / 62.1 / 63.7 | 0.96 |
+| RAG (Qwen3.6-27B) | 90.4 / 86.3 / 88.2 / 87.0 | 7.2 / 7.3 / 6.6 / 6.6 | 73.1 / 69.8 / 70.4 / 69.5 | 0.95-0.98 |
+| RAG + gate (Qwen3.6-27B) | 77.2 / 72.1 / 75.1 / 73.9 | 2.1 / 2.9 / 2.1 / 2.1 | 74.4 / 68.3 / 69.8 / 70.7 | 0.93-0.97 |
+
+- **English-only models give no protection in the other languages.** Legal-BERT and TF-IDF catch 55-73% of the unfair clauses in English and almost none in German, Italian and Polish: a complete violation of equality of opportunity. Their false-alarm rates are "equal" (zero) only because they flag nothing, which shows why a single fairness criterion is not enough.
+- **The multilingual systems protect all four languages about equally.** For the kNN vote and the three LLM systems every recall ratio is within the parity band of 0.8-1.25, and no difference from English (recall, false alarms, precision or macro-F1) is significant at 5%. The closest case is the plain LLM, whose recall is about 4 points lower in every language (intervals ending at +0.1 to +0.6).
+- **One ratio falls outside the band, without a real gap.** RAG + gate flags 2.9% of the fair German sentences against 2.1% in English (ratio 1.37). The rates are small and the difference, +0.8 points (interval −0.1 to +1.7), is not significant: ratios of small rates are unstable, so the ratio and the difference should be read together.
+- **German has the lowest recall for every multilingual system**, 4-6 points below English. No single gap is significant, but the pattern is systematic and would deserve a larger test set.
+- **The gate keeps the parity.** It cuts the false alarms from about 7% to about 2% in every language at the cost of 13-14 points of recall, the same trade-off as in English: which side to prefer (fewer missed unfair clauses or fewer false alarms) is a value choice discussed in the ethical analysis.
+- **The English rows are lower than on the UNFAIR-ToS test set.** For example Legal-BERT has 76.0 vs 82.8 macro-F1, because these are contracts of 10 other companies, so languages should be compared within this table only.
+
+The multilingual LLM with multilingual retrieval already reaches parity, so the mitigation planned in the proposal (translating the contracts into English before classifying them) is not needed for these systems; it would only matter for the English-only models.
 
 ## Notebooks
 
@@ -343,5 +390,5 @@ Results: to be added.
 - [x] Phase 3: baselines (always fair, TF-IDF+SVM, plain LLM, Legal-BERT) and shared evaluation
 - [x] Phase 4: RAG pipeline (retriever, kNN baseline, RAG with cited explanations, evidence gate, ablations, final test run, significance tests)
 - [x] Phase 5: evaluation of the explanations (grounding, error analysis, faithfulness, stability)
-- [ ] Phase 6: multilingual fairness (extension; in progress: open-weight replication on the DISI cluster)
+- [x] Phase 6: multilingual fairness (extension): open-weight replication on the DISI cluster, fairness by language
 - [ ] Phase 7: demo (extension)

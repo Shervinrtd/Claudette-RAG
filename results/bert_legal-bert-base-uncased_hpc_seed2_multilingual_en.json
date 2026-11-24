@@ -1,0 +1,197 @@
+{
+  "n_sentences": 2366,
+  "n_gold_unfair": 219,
+  "n_predicted_unfair": 178,
+  "headline": {
+    "lexglue_micro_f1": 0.9530398322851154,
+    "lexglue_macro_f1": 0.739011527782425,
+    "macro_f1_unfair_categories": 0.7093003101623792,
+    "binary_precision": 0.8314606741573034,
+    "binary_recall": 0.6757990867579908,
+    "binary_f1": 0.7455919395465994
+  },
+  "binary_confusion": {
+    "true_positive": 148,
+    "false_positive": 30,
+    "false_negative": 71,
+    "true_negative": 2117
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.8947368421052632,
+      "recall": 0.4857142857142857,
+      "f1": 0.6296296296296297,
+      "support": 70,
+      "predicted": 38
+    },
+    "Unilateral termination": {
+      "precision": 0.7906976744186046,
+      "recall": 0.8292682926829268,
+      "f1": 0.8095238095238095,
+      "support": 41,
+      "predicted": 43
+    },
+    "Unilateral change": {
+      "precision": 0.7,
+      "recall": 0.75,
+      "f1": 0.7241379310344827,
+      "support": 28,
+      "predicted": 30
+    },
+    "Content removal": {
+      "precision": 0.9444444444444444,
+      "recall": 0.6296296296296297,
+      "f1": 0.7555555555555556,
+      "support": 27,
+      "predicted": 18
+    },
+    "Contract by using": {
+      "precision": 0.875,
+      "recall": 0.7368421052631579,
+      "f1": 0.7999999999999999,
+      "support": 19,
+      "predicted": 16
+    },
+    "Choice of law": {
+      "precision": 0.7333333333333333,
+      "recall": 0.6111111111111112,
+      "f1": 0.6666666666666666,
+      "support": 18,
+      "predicted": 15
+    },
+    "Jurisdiction": {
+      "precision": 0.7916666666666666,
+      "recall": 0.9047619047619048,
+      "f1": 0.8444444444444444,
+      "support": 21,
+      "predicted": 24
+    },
+    "Arbitration": {
+      "precision": 0.8571428571428571,
+      "recall": 0.3,
+      "f1": 0.4444444444444444,
+      "support": 20,
+      "predicted": 7
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9675502742230347,
+      "recall": 0.9860270144387517,
+      "f1": 0.9767012687427912,
+      "support": 2147,
+      "predicted": 2188
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.94488493022169,
+      0.9614263845304624
+    ],
+    "lexglue_macro_f1": [
+      0.6873695854482027,
+      0.7814899854842472
+    ],
+    "macro_f1_unfair_categories": [
+      0.6512501591511644,
+      0.7569594691816633
+    ],
+    "binary_precision": [
+      0.7798666058023941,
+      0.8802730066183423
+    ],
+    "binary_recall": [
+      0.6128916499459793,
+      0.7319428131317993
+    ],
+    "binary_f1": [
+      0.6963606636793025,
+      0.7899585658718079
+    ]
+  },
+  "run": {
+    "name": "bert_legal-bert-base-uncased_hpc_seed2_multilingual_en",
+    "dataset": "multilingual",
+    "split": "multilingual_en",
+    "predictions": "results/predictions/bert_legal-bert-base-uncased_hpc_seed2_multilingual_en.jsonl",
+    "system": "fine-tuned encoder",
+    "model": "nlpaueb/legal-bert-base-uncased",
+    "seed": 2,
+    "training_minutes": 4.5,
+    "hyperparameters": {
+      "epochs": 20,
+      "patience": 3,
+      "lr": 3e-05,
+      "batch_size": 16,
+      "max_length": 256,
+      "threshold": 0.5
+    },
+    "history": {
+      "epochs": [
+        {
+          "epoch": 1,
+          "train_loss": 0.285282017630821,
+          "val_macro_f1": 0.1051954732510288,
+          "val_micro_f1": 0.895163055373167,
+          "seconds": 30.1
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.059566708445828946,
+          "val_macro_f1": 0.47649218864628234,
+          "val_micro_f1": 0.9285558225912169,
+          "seconds": 29.5
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.030919712168740572,
+          "val_macro_f1": 0.5954564667088165,
+          "val_micro_f1": 0.934207650273224,
+          "seconds": 29.8
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.018782861780434458,
+          "val_macro_f1": 0.726387749606648,
+          "val_micro_f1": 0.9329254970504698,
+          "seconds": 31.0
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.01314179219623134,
+          "val_macro_f1": 0.6849653377189949,
+          "val_micro_f1": 0.9504691250272748,
+          "seconds": 29.6
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.008855534075474033,
+          "val_macro_f1": 0.7776448845107338,
+          "val_micro_f1": 0.9565786602662011,
+          "seconds": 29.6
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0064281846408064695,
+          "val_macro_f1": 0.7611391900027372,
+          "val_micro_f1": 0.9506334643949323,
+          "seconds": 30.3
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.004487473077734265,
+          "val_macro_f1": 0.7612336986550439,
+          "val_micro_f1": 0.9455337690631809,
+          "seconds": 29.4
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.003952395112719387,
+          "val_macro_f1": 0.7713639234587066,
+          "val_micro_f1": 0.9513631406761177,
+          "seconds": 30.0
+        }
+      ],
+      "best_epoch": 6,
+      "best_val_macro_f1": 0.7776448845107338
+    }
+  }
+}

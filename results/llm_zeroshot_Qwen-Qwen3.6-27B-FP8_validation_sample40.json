@@ -1,0 +1,136 @@
+{
+  "n_sentences": 40,
+  "n_gold_unfair": 20,
+  "n_predicted_unfair": 28,
+  "headline": {
+    "lexglue_micro_f1": 0.7294117647058824,
+    "lexglue_macro_f1": 0.6876882376882377,
+    "macro_f1_unfair_categories": 0.6798992673992674,
+    "binary_precision": 0.7142857142857143,
+    "binary_recall": 1.0,
+    "binary_f1": 0.8333333333333333
+  },
+  "binary_confusion": {
+    "true_positive": 20,
+    "false_positive": 8,
+    "false_negative": 0,
+    "true_negative": 12
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.5,
+      "recall": 0.8,
+      "f1": 0.6153846153846154,
+      "support": 5,
+      "predicted": 8
+    },
+    "Unilateral termination": {
+      "precision": 0.75,
+      "recall": 0.8571428571428571,
+      "f1": 0.7999999999999999,
+      "support": 7,
+      "predicted": 8
+    },
+    "Unilateral change": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1": 0.8571428571428571,
+      "support": 3,
+      "predicted": 4
+    },
+    "Content removal": {
+      "precision": 0.6,
+      "recall": 0.75,
+      "f1": 0.6666666666666665,
+      "support": 4,
+      "predicted": 5
+    },
+    "Contract by using": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 0,
+      "predicted": 1
+    },
+    "Choice of law": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1,
+      "predicted": 1
+    },
+    "Jurisdiction": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 1,
+      "predicted": 1
+    },
+    "Arbitration": {
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "f1": 0.5,
+      "support": 1,
+      "predicted": 3
+    },
+    "Fair (no unfair category)": {
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.7499999999999999,
+      "support": 20,
+      "predicted": 12
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.6046511627906976,
+      0.8536585365853658
+    ],
+    "lexglue_macro_f1": [
+      0.3927843235912121,
+      0.7524717670819822
+    ],
+    "macro_f1_unfair_categories": [
+      0.3514720206264324,
+      0.7494143907563026
+    ],
+    "binary_precision": [
+      0.5483137829912023,
+      0.875
+    ],
+    "binary_recall": [
+      1.0,
+      1.0
+    ],
+    "binary_f1": [
+      0.7082720588235294,
+      0.9333333333333333
+    ]
+  },
+  "run": {
+    "name": "llm_zeroshot_Qwen-Qwen3.6-27B-FP8_validation_sample40",
+    "system": "plain LLM (zero-shot, no retrieval)",
+    "model": "Qwen/Qwen3.6-27B-FP8",
+    "base_url": "http://localhost:8000/v1",
+    "server_options": {
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "dataset": "unfair_tos",
+    "split": "validation",
+    "language": null,
+    "sample": 40,
+    "predictions": "results/predictions/llm_zeroshot_Qwen-Qwen3.6-27B-FP8_validation_sample40.jsonl",
+    "log": "results/llm_logs/llm_zeroshot_Qwen-Qwen3.6-27B-FP8_validation_sample40.jsonl"
+  },
+  "llm": {
+    "estimated_cost_usd": 0.0,
+    "prompt_tokens": 46569,
+    "cached_tokens": 0,
+    "completion_tokens": 3555,
+    "mean_seconds_per_request": 11.54,
+    "inconsistent_answers": 0,
+    "parse_errors": 0
+  }
+}

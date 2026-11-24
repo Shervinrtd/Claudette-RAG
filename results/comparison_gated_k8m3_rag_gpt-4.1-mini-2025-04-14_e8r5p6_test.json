@@ -177,6 +177,90 @@
         "high": 0.05697475629273967,
         "p_value": 0.01
       }
+    },
+    "Qwen3.6-27B RAG + gate": {
+      "predictions": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": 0.004327160772781946,
+        "low": -0.014215473897679373,
+        "high": 0.021655098299423834,
+        "p_value": 0.67
+      },
+      "binary_precision": {
+        "difference": 0.026153846153846194,
+        "low": 0.003183801148885862,
+        "high": 0.050458097175697145,
+        "p_value": 0.036
+      },
+      "binary_recall": {
+        "difference": -0.005813953488372103,
+        "low": -0.019361163820366904,
+        "high": 0.0,
+        "p_value": 0.74
+      }
+    },
+    "Qwen3.6-27B plain LLM": {
+      "predictions": "llm_zeroshot_Qwen-Qwen3.6-27B-FP8_test",
+      "lexglue_macro_f1": {
+        "difference": 0.15193108688649348,
+        "low": 0.09593026170624831,
+        "high": 0.20366214220042134,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.4637173579109063,
+        "low": 0.4122169570973729,
+        "high": 0.5128095724674253,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.13372093023255804,
+        "low": -0.1843782329815849,
+        "high": -0.08483253588516747,
+        "p_value": 0.0
+      }
+    },
+    "Qwen3.6-27B RAG, no gate": {
+      "predictions": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": 0.07586287951443693,
+        "low": 0.023331545785204865,
+        "high": 0.125696210247881,
+        "p_value": 0.006
+      },
+      "binary_precision": {
+        "difference": 0.288876560332871,
+        "low": 0.23760241220011782,
+        "high": 0.3371873354273788,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.12209302325581395,
+        "low": -0.16766467065868262,
+        "high": -0.07498835403726715,
+        "p_value": 0.0
+      }
+    },
+    "Qwen3.6-27B examples only + gate": {
+      "predictions": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r0p0_test",
+      "lexglue_macro_f1": {
+        "difference": -0.007659695169380809,
+        "low": -0.030373165005560848,
+        "high": 0.012336219780504358,
+        "p_value": 0.436
+      },
+      "binary_precision": {
+        "difference": -0.00755221386800331,
+        "low": -0.039644338124583456,
+        "high": 0.02249768760181589,
+        "p_value": 0.64
+      },
+      "binary_recall": {
+        "difference": 0.011627906976744207,
+        "low": -0.012993463490152235,
+        "high": 0.04167921686746984,
+        "p_value": 0.512
+      }
     }
   }
 }

@@ -1,0 +1,118 @@
+{
+  "n_sentences": 2270,
+  "n_gold_unfair": 219,
+  "n_predicted_unfair": 2,
+  "headline": {
+    "lexglue_micro_f1": 0.8983793254489706,
+    "lexglue_macro_f1": 0.11557810099139111,
+    "macro_f1_unfair_categories": 0.011363636363636362,
+    "binary_precision": 0.5,
+    "binary_recall": 0.0045662100456621,
+    "binary_f1": 0.00904977375565611
+  },
+  "binary_confusion": {
+    "true_positive": 1,
+    "false_positive": 1,
+    "false_negative": 218,
+    "true_negative": 2050
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 76,
+      "predicted": 0
+    },
+    "Unilateral termination": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 42,
+      "predicted": 0
+    },
+    "Unilateral change": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 28,
+      "predicted": 0
+    },
+    "Content removal": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 26,
+      "predicted": 1
+    },
+    "Contract by using": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 19,
+      "predicted": 0
+    },
+    "Choice of law": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 17,
+      "predicted": 0
+    },
+    "Jurisdiction": {
+      "precision": 1.0,
+      "recall": 0.047619047619047616,
+      "f1": 0.0909090909090909,
+      "support": 21,
+      "predicted": 1
+    },
+    "Arbitration": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 16,
+      "predicted": 0
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9038800705467372,
+      "recall": 0.999512432959532,
+      "f1": 0.949293818013429,
+      "support": 2051,
+      "predicted": 2268
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.8856818101974168,
+      0.910968810489446
+    ],
+    "lexglue_macro_f1": [
+      0.10493615450285883,
+      0.13689638763323503
+    ],
+    "macro_f1_unfair_categories": [
+      0.0,
+      0.03571428571428571
+    ],
+    "binary_precision": [
+      0.0,
+      1.0
+    ],
+    "binary_recall": [
+      0.0,
+      0.014287423103212574
+    ],
+    "binary_f1": [
+      0.0,
+      0.028040673950243518
+    ]
+  },
+  "run": {
+    "name": "tfidf_svm_multilingual_de",
+    "dataset": "multilingual",
+    "system": "TF-IDF + linear SVM (trained on English)",
+    "language": "de",
+    "C": 10.0,
+    "predictions": "results/predictions/tfidf_svm_multilingual_de.jsonl"
+  }
+}

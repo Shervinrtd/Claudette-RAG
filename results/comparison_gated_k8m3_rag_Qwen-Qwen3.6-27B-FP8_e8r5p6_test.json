@@ -1,0 +1,266 @@
+{
+  "reference": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+  "n_bootstrap": 1000,
+  "reference_scores": {
+    "lexglue_micro_f1": 0.9539697250540624,
+    "lexglue_macro_f1": 0.7898095881651884,
+    "macro_f1_unfair_categories": 0.7663329894830397,
+    "binary_precision": 0.7967032967032966,
+    "binary_recall": 0.8430232558139535,
+    "binary_f1": 0.8192090395480226
+  },
+  "comparisons": {
+    "Legal-BERT seed 1": {
+      "predictions": "bert_legal-bert-base-uncased_seed1_test",
+      "lexglue_macro_f1": {
+        "difference": -0.029485684040055804,
+        "low": -0.07971854405448074,
+        "high": 0.017208825553277664,
+        "p_value": 0.234
+      },
+      "binary_precision": {
+        "difference": -0.02250574284472595,
+        "low": -0.08408134027134807,
+        "high": 0.03703830891330886,
+        "p_value": 0.506
+      },
+      "binary_recall": {
+        "difference": 0.0,
+        "low": -0.049087328637430934,
+        "high": 0.056344671804411404,
+        "p_value": 1.0
+      }
+    },
+    "Legal-BERT seed 2": {
+      "predictions": "bert_legal-bert-base-uncased_seed2_test",
+      "lexglue_macro_f1": {
+        "difference": -0.05052992230909037,
+        "low": -0.10301466242598449,
+        "high": 0.002324396456727005,
+        "p_value": 0.06
+      },
+      "binary_precision": {
+        "difference": -0.10870210870210872,
+        "low": -0.1694652094257656,
+        "high": -0.052804594158001414,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": 0.06395348837209303,
+        "low": 0.011490987460815033,
+        "high": 0.11478847170809094,
+        "p_value": 0.03
+      }
+    },
+    "Legal-BERT seed 3": {
+      "predictions": "bert_legal-bert-base-uncased_seed3_test",
+      "lexglue_macro_f1": {
+        "difference": -0.03202255926584474,
+        "low": -0.08427230425432622,
+        "high": 0.017946344206895944,
+        "p_value": 0.218
+      },
+      "binary_precision": {
+        "difference": -0.050355526826115105,
+        "low": -0.11071194628674366,
+        "high": 0.0039448031459717635,
+        "p_value": 0.076
+      },
+      "binary_recall": {
+        "difference": 0.005813953488372103,
+        "low": -0.04970418820916765,
+        "high": 0.0633217639853001,
+        "p_value": 0.826
+      }
+    },
+    "TF-IDF + SVM": {
+      "predictions": "tfidf_svm_test",
+      "lexglue_macro_f1": {
+        "difference": 0.003539751668128366,
+        "low": -0.0699670031480973,
+        "high": 0.07579947117189488,
+        "p_value": 0.902
+      },
+      "binary_precision": {
+        "difference": -0.1186813186813187,
+        "low": -0.1764326770436263,
+        "high": -0.059442310974569,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": 0.15116279069767447,
+        "low": 0.08234329797492772,
+        "high": 0.22581100783670496,
+        "p_value": 0.0
+      }
+    },
+    "kNN vote (bge-m3)": {
+      "predictions": "knn_bge-m3_test",
+      "lexglue_macro_f1": {
+        "difference": 0.01141085869162417,
+        "low": -0.0242661723067087,
+        "high": 0.047846613922359164,
+        "p_value": 0.532
+      },
+      "binary_precision": {
+        "difference": 0.016483516483516425,
+        "low": -0.023788188648764606,
+        "high": 0.05481245592668963,
+        "p_value": 0.432
+      },
+      "binary_recall": {
+        "difference": 0.01744186046511631,
+        "low": -0.023532892446919623,
+        "high": 0.059523809523809534,
+        "p_value": 0.49
+      }
+    },
+    "Plain LLM": {
+      "predictions": "llm_zeroshot_gpt-4.1-mini-2025-04-14_test",
+      "lexglue_macro_f1": {
+        "difference": 0.14758846554039706,
+        "low": 0.09579566755094811,
+        "high": 0.19397912292977645,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.38388278388278385,
+        "low": 0.32807735219739126,
+        "high": 0.43672149203427973,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.09302325581395343,
+        "low": -0.13943669827105412,
+        "high": -0.042920116693122824,
+        "p_value": 0.0
+      }
+    },
+    "RAG full, no gate": {
+      "predictions": "rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": 0.07674089937352924,
+        "low": 0.027991589301424754,
+        "high": 0.11544890504461042,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.24687511800913853,
+        "low": 0.19937263626726126,
+        "high": 0.2948457185329612,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.08720930232558133,
+        "low": -0.13142857142857145,
+        "high": -0.045196828868233924,
+        "p_value": 0.0
+      }
+    },
+    "RAG examples only + gate": {
+      "predictions": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r0p0_test",
+      "lexglue_macro_f1": {
+        "difference": 0.0005770985142045104,
+        "low": -0.023033228834736883,
+        "high": 0.024845733463451283,
+        "p_value": 0.97
+      },
+      "binary_precision": {
+        "difference": -0.04064610088706477,
+        "low": -0.07750030332668328,
+        "high": -0.005865335209287028,
+        "p_value": 0.026
+      },
+      "binary_recall": {
+        "difference": 0.03488372093023262,
+        "low": 0.011297848028946875,
+        "high": 0.06547862997658078,
+        "p_value": 0.006
+      }
+    },
+    "gpt-4.1-mini RAG + gate (main)": {
+      "predictions": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": -0.004327160772781946,
+        "low": -0.021655098299423838,
+        "high": 0.014215473897679373,
+        "p_value": 0.67
+      },
+      "binary_precision": {
+        "difference": -0.026153846153846194,
+        "low": -0.05045809717569715,
+        "high": -0.0031838011488858637,
+        "p_value": 0.036
+      },
+      "binary_recall": {
+        "difference": 0.005813953488372103,
+        "low": 0.0,
+        "high": 0.0193611638203669,
+        "p_value": 0.74
+      }
+    },
+    "Qwen3.6-27B plain LLM": {
+      "predictions": "llm_zeroshot_Qwen-Qwen3.6-27B-FP8_test",
+      "lexglue_macro_f1": {
+        "difference": 0.14760392611371154,
+        "low": 0.09206688290187408,
+        "high": 0.19476989965708782,
+        "p_value": 0.0
+      },
+      "binary_precision": {
+        "difference": 0.4375635117570601,
+        "low": 0.3871475119666825,
+        "high": 0.48730607725120456,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.12790697674418594,
+        "low": -0.17442321889996307,
+        "high": -0.08044214089274385,
+        "p_value": 0.0
+      }
+    },
+    "Qwen3.6-27B RAG, no gate": {
+      "predictions": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+      "lexglue_macro_f1": {
+        "difference": 0.07153571874165499,
+        "low": 0.02211145481385999,
+        "high": 0.11568129135114114,
+        "p_value": 0.006
+      },
+      "binary_precision": {
+        "difference": 0.2627227141790248,
+        "low": 0.2165903708871767,
+        "high": 0.30804312968640185,
+        "p_value": 0.0
+      },
+      "binary_recall": {
+        "difference": -0.11627906976744184,
+        "low": -0.16002298850574714,
+        "high": -0.06857142857142862,
+        "p_value": 0.0
+      }
+    },
+    "Qwen3.6-27B examples only + gate": {
+      "predictions": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r0p0_test",
+      "lexglue_macro_f1": {
+        "difference": -0.011986855942162755,
+        "low": -0.030182003353039565,
+        "high": 0.004362732060330133,
+        "p_value": 0.184
+      },
+      "binary_precision": {
+        "difference": -0.033706060021849504,
+        "low": -0.06412288503573335,
+        "high": -0.008253745997815407,
+        "p_value": 0.006
+      },
+      "binary_recall": {
+        "difference": 0.01744186046511631,
+        "low": -0.005917159763313531,
+        "high": 0.04571428571428571,
+        "p_value": 0.224
+      }
+    }
+  }
+}

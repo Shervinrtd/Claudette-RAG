@@ -1,0 +1,150 @@
+{
+  "n_sentences": 2366,
+  "n_gold_unfair": 219,
+  "n_predicted_unfair": 353,
+  "headline": {
+    "lexglue_micro_f1": 0.9215686274509802,
+    "lexglue_macro_f1": 0.7314826593624179,
+    "macro_f1_unfair_categories": 0.7032064533211816,
+    "binary_precision": 0.5609065155807366,
+    "binary_recall": 0.9041095890410958,
+    "binary_f1": 0.6923076923076923
+  },
+  "binary_confusion": {
+    "true_positive": 198,
+    "false_positive": 155,
+    "false_negative": 21,
+    "true_negative": 1992
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.5126050420168067,
+      "recall": 0.8714285714285714,
+      "f1": 0.6455026455026455,
+      "support": 70,
+      "predicted": 119
+    },
+    "Unilateral termination": {
+      "precision": 0.6333333333333333,
+      "recall": 0.926829268292683,
+      "f1": 0.7524752475247526,
+      "support": 41,
+      "predicted": 60
+    },
+    "Unilateral change": {
+      "precision": 0.4583333333333333,
+      "recall": 0.7857142857142857,
+      "f1": 0.5789473684210527,
+      "support": 28,
+      "predicted": 48
+    },
+    "Content removal": {
+      "precision": 0.5869565217391305,
+      "recall": 1.0,
+      "f1": 0.7397260273972603,
+      "support": 27,
+      "predicted": 46
+    },
+    "Contract by using": {
+      "precision": 0.6923076923076923,
+      "recall": 0.9473684210526315,
+      "f1": 0.7999999999999999,
+      "support": 19,
+      "predicted": 26
+    },
+    "Choice of law": {
+      "precision": 0.6818181818181818,
+      "recall": 0.8333333333333334,
+      "f1": 0.7499999999999999,
+      "support": 18,
+      "predicted": 22
+    },
+    "Jurisdiction": {
+      "precision": 0.7692307692307693,
+      "recall": 0.9523809523809523,
+      "f1": 0.8510638297872339,
+      "support": 21,
+      "predicted": 26
+    },
+    "Arbitration": {
+      "precision": 0.37209302325581395,
+      "recall": 0.8,
+      "f1": 0.5079365079365079,
+      "support": 20,
+      "predicted": 43
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9895678092399404,
+      "recall": 0.927806241266884,
+      "f1": 0.9576923076923077,
+      "support": 2147,
+      "predicted": 2013
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.911332189540386,
+      0.9319087644210045
+    ],
+    "lexglue_macro_f1": [
+      0.6860864887449143,
+      0.7674481710973574
+    ],
+    "macro_f1_unfair_categories": [
+      0.6524339381709799,
+      0.7433094541365953
+    ],
+    "binary_precision": [
+      0.510078026538656,
+      0.6092940634397129
+    ],
+    "binary_recall": [
+      0.8642206628844431,
+      0.9403669724770642
+    ],
+    "binary_f1": [
+      0.6495398656956399,
+      0.7307033940654502
+    ]
+  },
+  "run": {
+    "name": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_en",
+    "system": "RAG (retrieved examples, rationales and provisions)",
+    "model": "Qwen/Qwen3.6-27B-FP8",
+    "base_url": "http://localhost:8000/v1",
+    "server_options": {
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "embedder": "BAAI/bge-m3",
+    "retrieval": {
+      "k_examples": 8,
+      "k_rationales": 5,
+      "max_provisions": 6
+    },
+    "dataset": "multilingual",
+    "split": "validation",
+    "language": "en",
+    "sample": null,
+    "predictions": "results/predictions/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_en.jsonl",
+    "explanations": "results/explanations/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_en.jsonl",
+    "log": "results/llm_logs/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_en.jsonl"
+  },
+  "llm": {
+    "estimated_cost_usd": 0.0,
+    "prompt_tokens": 5362682,
+    "cached_tokens": 0,
+    "completion_tokens": 286340,
+    "mean_seconds_per_request": 38.79,
+    "inconsistent_answers": 0,
+    "parse_errors": 0
+  },
+  "citations": {
+    "answers_citing_retrieved_items": 0.5913,
+    "unfair_verdicts": 353,
+    "unfair_verdicts_citing_rationale_or_provision": 0.9915,
+    "invalid_citations": 1,
+    "answers_with_invalid_citation": 1
+  }
+}

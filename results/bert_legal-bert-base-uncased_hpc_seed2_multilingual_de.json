@@ -1,0 +1,197 @@
+{
+  "n_sentences": 2270,
+  "n_gold_unfair": 219,
+  "n_predicted_unfair": 0,
+  "headline": {
+    "lexglue_micro_f1": 0.8983793254489706,
+    "lexglue_macro_f1": 0.10547969862943249,
+    "macro_f1_unfair_categories": 0.0,
+    "binary_precision": 0.0,
+    "binary_recall": 0.0,
+    "binary_f1": 0.0
+  },
+  "binary_confusion": {
+    "true_positive": 0,
+    "false_positive": 0,
+    "false_negative": 219,
+    "true_negative": 2051
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 76,
+      "predicted": 0
+    },
+    "Unilateral termination": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 42,
+      "predicted": 0
+    },
+    "Unilateral change": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 28,
+      "predicted": 0
+    },
+    "Content removal": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 26,
+      "predicted": 0
+    },
+    "Contract by using": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 19,
+      "predicted": 0
+    },
+    "Choice of law": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 17,
+      "predicted": 0
+    },
+    "Jurisdiction": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 21,
+      "predicted": 0
+    },
+    "Arbitration": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 16,
+      "predicted": 0
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9035242290748898,
+      "recall": 1.0,
+      "f1": 0.9493172876648924,
+      "support": 2051,
+      "predicted": 2270
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.8857744616230824,
+      0.9111657029646479
+    ],
+    "lexglue_macro_f1": [
+      0.104718275228408,
+      0.10620464070326076
+    ],
+    "macro_f1_unfair_categories": [
+      0.0,
+      0.0
+    ],
+    "binary_precision": [
+      0.0,
+      0.0
+    ],
+    "binary_recall": [
+      0.0,
+      0.0
+    ],
+    "binary_f1": [
+      0.0,
+      0.0
+    ]
+  },
+  "run": {
+    "name": "bert_legal-bert-base-uncased_hpc_seed2_multilingual_de",
+    "dataset": "multilingual",
+    "split": "multilingual_de",
+    "predictions": "results/predictions/bert_legal-bert-base-uncased_hpc_seed2_multilingual_de.jsonl",
+    "system": "fine-tuned encoder",
+    "model": "nlpaueb/legal-bert-base-uncased",
+    "seed": 2,
+    "training_minutes": 4.5,
+    "hyperparameters": {
+      "epochs": 20,
+      "patience": 3,
+      "lr": 3e-05,
+      "batch_size": 16,
+      "max_length": 256,
+      "threshold": 0.5
+    },
+    "history": {
+      "epochs": [
+        {
+          "epoch": 1,
+          "train_loss": 0.285282017630821,
+          "val_macro_f1": 0.1051954732510288,
+          "val_micro_f1": 0.895163055373167,
+          "seconds": 30.1
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.059566708445828946,
+          "val_macro_f1": 0.47649218864628234,
+          "val_micro_f1": 0.9285558225912169,
+          "seconds": 29.5
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.030919712168740572,
+          "val_macro_f1": 0.5954564667088165,
+          "val_micro_f1": 0.934207650273224,
+          "seconds": 29.8
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.018782861780434458,
+          "val_macro_f1": 0.726387749606648,
+          "val_micro_f1": 0.9329254970504698,
+          "seconds": 31.0
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.01314179219623134,
+          "val_macro_f1": 0.6849653377189949,
+          "val_micro_f1": 0.9504691250272748,
+          "seconds": 29.6
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.008855534075474033,
+          "val_macro_f1": 0.7776448845107338,
+          "val_micro_f1": 0.9565786602662011,
+          "seconds": 29.6
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0064281846408064695,
+          "val_macro_f1": 0.7611391900027372,
+          "val_micro_f1": 0.9506334643949323,
+          "seconds": 30.3
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.004487473077734265,
+          "val_macro_f1": 0.7612336986550439,
+          "val_micro_f1": 0.9455337690631809,
+          "seconds": 29.4
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.003952395112719387,
+          "val_macro_f1": 0.7713639234587066,
+          "val_micro_f1": 0.9513631406761177,
+          "seconds": 30.0
+        }
+      ],
+      "best_epoch": 6,
+      "best_val_macro_f1": 0.7776448845107338
+    }
+  }
+}

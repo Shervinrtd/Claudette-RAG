@@ -8,7 +8,7 @@ sentences. A difference whose interval contains 0 (p >= 0.05) is not significant
 
 Usage (from the project root):
     python scripts/compare_systems.py
-    python scripts/compare_systems.py --reference bert_legal-bert-base-uncased_seed1_test
+    python scripts/compare_systems.py --reference gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test   # open-weight replication
 """
 
 from __future__ import annotations
@@ -32,6 +32,11 @@ SYSTEMS = {
     "Plain LLM": "llm_zeroshot_gpt-4.1-mini-2025-04-14_test",
     "RAG full, no gate": "rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
     "RAG examples only + gate": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r0p0_test",
+    "gpt-4.1-mini RAG + gate (main)": "gated_k8m3_rag_gpt-4.1-mini-2025-04-14_e8r5p6_test",
+    "Qwen3.6-27B RAG + gate": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+    "Qwen3.6-27B plain LLM": "llm_zeroshot_Qwen-Qwen3.6-27B-FP8_test",
+    "Qwen3.6-27B RAG, no gate": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+    "Qwen3.6-27B examples only + gate": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r0p0_test",
 }
 METRICS = {"lexglue_macro_f1": "macro-F1", "binary_precision": "precision", "binary_recall": "recall"}
 

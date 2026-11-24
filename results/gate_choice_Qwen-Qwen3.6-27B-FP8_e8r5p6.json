@@ -1,0 +1,71 @@
+{
+  "source_run": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_validation",
+  "rule": "best validation macro-F1 with unfair recall >= 80%",
+  "k": 8,
+  "m": 3,
+  "grid": [
+    {
+      "k": 3,
+      "m": 1,
+      "lexglue_macro_f1": 0.7714729787172158,
+      "binary_precision": 0.6962457337883959,
+      "binary_recall": 0.8869565217391304
+    },
+    {
+      "k": 3,
+      "m": 2,
+      "lexglue_macro_f1": 0.7902167923536888,
+      "binary_precision": 0.8365384615384616,
+      "binary_recall": 0.7565217391304347
+    },
+    {
+      "k": 3,
+      "m": 3,
+      "lexglue_macro_f1": 0.6496709335614905,
+      "binary_precision": 0.8934426229508197,
+      "binary_recall": 0.47391304347826085
+    },
+    {
+      "k": 5,
+      "m": 1,
+      "lexglue_macro_f1": 0.7442898114669568,
+      "binary_precision": 0.6374622356495468,
+      "binary_recall": 0.9173913043478261
+    },
+    {
+      "k": 5,
+      "m": 2,
+      "lexglue_macro_f1": 0.7889713951461313,
+      "binary_precision": 0.766798418972332,
+      "binary_recall": 0.8434782608695652
+    },
+    {
+      "k": 5,
+      "m": 3,
+      "lexglue_macro_f1": 0.7829201177993897,
+      "binary_precision": 0.855,
+      "binary_recall": 0.7434782608695653
+    },
+    {
+      "k": 8,
+      "m": 1,
+      "lexglue_macro_f1": 0.7175764641740446,
+      "binary_precision": 0.5819672131147541,
+      "binary_recall": 0.9260869565217391
+    },
+    {
+      "k": 8,
+      "m": 2,
+      "lexglue_macro_f1": 0.7744245800457252,
+      "binary_precision": 0.69,
+      "binary_recall": 0.9
+    },
+    {
+      "k": 8,
+      "m": 3,
+      "lexglue_macro_f1": 0.7924845280345891,
+      "binary_precision": 0.7607843137254902,
+      "binary_recall": 0.8434782608695652
+    }
+  ]
+}

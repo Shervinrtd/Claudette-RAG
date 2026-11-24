@@ -1,0 +1,150 @@
+{
+  "n_sentences": 2473,
+  "n_gold_unfair": 229,
+  "n_predicted_unfair": 349,
+  "headline": {
+    "lexglue_micro_f1": 0.923076923076923,
+    "lexglue_macro_f1": 0.70381499542694,
+    "macro_f1_unfair_categories": 0.6717712654597032,
+    "binary_precision": 0.5787965616045845,
+    "binary_recall": 0.8820960698689956,
+    "binary_f1": 0.6989619377162629
+  },
+  "binary_confusion": {
+    "true_positive": 202,
+    "false_positive": 147,
+    "false_negative": 27,
+    "true_negative": 2097
+  },
+  "per_label": {
+    "Limitation of liability": {
+      "precision": 0.5663716814159292,
+      "recall": 0.8767123287671232,
+      "f1": 0.6881720430107526,
+      "support": 73,
+      "predicted": 113
+    },
+    "Unilateral termination": {
+      "precision": 0.6724137931034483,
+      "recall": 0.9285714285714286,
+      "f1": 0.78,
+      "support": 42,
+      "predicted": 58
+    },
+    "Unilateral change": {
+      "precision": 0.46153846153846156,
+      "recall": 0.8,
+      "f1": 0.5853658536585367,
+      "support": 30,
+      "predicted": 52
+    },
+    "Content removal": {
+      "precision": 0.48148148148148145,
+      "recall": 0.9629629629629629,
+      "f1": 0.6419753086419752,
+      "support": 27,
+      "predicted": 54
+    },
+    "Contract by using": {
+      "precision": 0.59375,
+      "recall": 0.8636363636363636,
+      "f1": 0.7037037037037037,
+      "support": 22,
+      "predicted": 32
+    },
+    "Choice of law": {
+      "precision": 0.6363636363636364,
+      "recall": 0.8235294117647058,
+      "f1": 0.717948717948718,
+      "support": 17,
+      "predicted": 22
+    },
+    "Jurisdiction": {
+      "precision": 0.7407407407407407,
+      "recall": 0.9090909090909091,
+      "f1": 0.8163265306122449,
+      "support": 22,
+      "predicted": 27
+    },
+    "Arbitration": {
+      "precision": 0.34210526315789475,
+      "recall": 0.6190476190476191,
+      "f1": 0.44067796610169496,
+      "support": 21,
+      "predicted": 38
+    },
+    "Fair (no unfair category)": {
+      "precision": 0.9872881355932204,
+      "recall": 0.9344919786096256,
+      "f1": 0.9601648351648352,
+      "support": 2244,
+      "predicted": 2124
+    }
+  },
+  "confidence_95": {
+    "lexglue_micro_f1": [
+      0.912630075469642,
+      0.9337338228692743
+    ],
+    "lexglue_macro_f1": [
+      0.6575036357868405,
+      0.7429047045359618
+    ],
+    "macro_f1_unfair_categories": [
+      0.6198881357248872,
+      0.7153190447661891
+    ],
+    "binary_precision": [
+      0.5237611607142857,
+      0.6332508258354169
+    ],
+    "binary_recall": [
+      0.838416322982371,
+      0.9241814300759799
+    ],
+    "binary_f1": [
+      0.6538392857142857,
+      0.7412458080397617
+    ]
+  },
+  "run": {
+    "name": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_it",
+    "system": "RAG (retrieved examples, rationales and provisions)",
+    "model": "Qwen/Qwen3.6-27B-FP8",
+    "base_url": "http://localhost:8000/v1",
+    "server_options": {
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    },
+    "embedder": "BAAI/bge-m3",
+    "retrieval": {
+      "k_examples": 8,
+      "k_rationales": 5,
+      "max_provisions": 6
+    },
+    "dataset": "multilingual",
+    "split": "validation",
+    "language": "it",
+    "sample": null,
+    "predictions": "results/predictions/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_it.jsonl",
+    "explanations": "results/explanations/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_it.jsonl",
+    "log": "results/llm_logs/rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_multilingual_it.jsonl"
+  },
+  "llm": {
+    "estimated_cost_usd": 0.0,
+    "prompt_tokens": 5684286,
+    "cached_tokens": 0,
+    "completion_tokens": 303032,
+    "mean_seconds_per_request": 40.65,
+    "inconsistent_answers": 2,
+    "parse_errors": 1
+  },
+  "citations": {
+    "answers_citing_retrieved_items": 0.594,
+    "unfair_verdicts": 349,
+    "unfair_verdicts_citing_rationale_or_provision": 0.9599,
+    "invalid_citations": 2,
+    "answers_with_invalid_citation": 2
+  }
+}

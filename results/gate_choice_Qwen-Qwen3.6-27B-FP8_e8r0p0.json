@@ -1,0 +1,71 @@
+{
+  "source_run": "rag_Qwen-Qwen3.6-27B-FP8_e8r0p0_validation",
+  "rule": "best validation macro-F1 with unfair recall >= 80%",
+  "k": 8,
+  "m": 3,
+  "grid": [
+    {
+      "k": 3,
+      "m": 1,
+      "lexglue_macro_f1": 0.7932067820733311,
+      "binary_precision": 0.7472527472527473,
+      "binary_recall": 0.8869565217391304
+    },
+    {
+      "k": 3,
+      "m": 2,
+      "lexglue_macro_f1": 0.7980140577640805,
+      "binary_precision": 0.8613861386138614,
+      "binary_recall": 0.7565217391304347
+    },
+    {
+      "k": 3,
+      "m": 3,
+      "lexglue_macro_f1": 0.6503408847811669,
+      "binary_precision": 0.8934426229508197,
+      "binary_recall": 0.47391304347826085
+    },
+    {
+      "k": 5,
+      "m": 1,
+      "lexglue_macro_f1": 0.7722011696731933,
+      "binary_precision": 0.6976744186046512,
+      "binary_recall": 0.9130434782608695
+    },
+    {
+      "k": 5,
+      "m": 2,
+      "lexglue_macro_f1": 0.7989158161100133,
+      "binary_precision": 0.7926829268292683,
+      "binary_recall": 0.8478260869565217
+    },
+    {
+      "k": 5,
+      "m": 3,
+      "lexglue_macro_f1": 0.7865418236462747,
+      "binary_precision": 0.868020304568528,
+      "binary_recall": 0.7434782608695653
+    },
+    {
+      "k": 8,
+      "m": 1,
+      "lexglue_macro_f1": 0.7571670341601145,
+      "binary_precision": 0.65527950310559,
+      "binary_recall": 0.9173913043478261
+    },
+    {
+      "k": 8,
+      "m": 2,
+      "lexglue_macro_f1": 0.794103631606046,
+      "binary_precision": 0.7314487632508834,
+      "binary_recall": 0.9
+    },
+    {
+      "k": 8,
+      "m": 3,
+      "lexglue_macro_f1": 0.8095171469922711,
+      "binary_precision": 0.7959183673469388,
+      "binary_recall": 0.8478260869565217
+    }
+  ]
+}

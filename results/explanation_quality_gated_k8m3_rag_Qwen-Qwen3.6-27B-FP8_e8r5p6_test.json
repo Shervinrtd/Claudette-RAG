@@ -1,0 +1,62 @@
+{
+  "explanations": "rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+  "predictions": "gated_k8m3_rag_Qwen-Qwen3.6-27B-FP8_e8r5p6_test",
+  "counts": {
+    "flags": {
+      "all": 191,
+      "correct": 146,
+      "wrong": 45
+    },
+    "grounded": {
+      "all": 191,
+      "correct": 146,
+      "wrong": 45
+    },
+    "legal": {
+      "all": 191,
+      "correct": 146,
+      "wrong": 45
+    },
+    "specific_legal": {
+      "all": 190,
+      "correct": 145,
+      "wrong": 45
+    },
+    "consistent_any": {
+      "all": 191,
+      "correct": 146,
+      "wrong": 45
+    },
+    "consistent_rationale": {
+      "all": 172,
+      "correct": 134,
+      "wrong": 38
+    },
+    "consistent_provision": {
+      "all": 146,
+      "correct": 119,
+      "wrong": 27
+    },
+    "consistent_example": {
+      "all": 168,
+      "correct": 130,
+      "wrong": 38
+    },
+    "consistent_legal": {
+      "all": 185,
+      "correct": 144,
+      "wrong": 41
+    },
+    "contradiction": {
+      "all": 0,
+      "correct": 0,
+      "wrong": 0
+    },
+    "invented": {
+      "all": 1,
+      "correct": 1,
+      "wrong": 0
+    }
+  },
+  "unsupported_examples": []
+}

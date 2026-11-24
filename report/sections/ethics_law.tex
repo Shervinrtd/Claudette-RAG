@@ -1,0 +1,294 @@
+% =====================================================================================
+% Ethical and legal analysis (goal G4 of the proposal).
+% Included by the final report and by report/ethics_law.tex (standalone draft).
+% \xref{label}: reference to another section of the final report, printed as " (Section N)";
+% the standalone draft (report/ethics_law.tex) prints nothing.
+% =====================================================================================
+\section{Ethical and legal analysis}
+\label{sec:ethics}
+
+This section asks whether the system should be used, by whom and under which conditions. It follows the structure of the course: the law that applies (consumer protection, the AI Act, data protection and fundamental rights), the Ethics Guidelines for Trustworthy AI, and the main ethical theories. Every claim is tied to a design choice or to a measured result, because the ethics of a system depends on how it actually behaves: a system that misses one unfair clause in six raises different questions from one that never errs.
+
+% -------------------------------------------------------------------------------------
+\subsection{What is at stake}
+\label{sec:ethics-stakes}
+
+Standard terms are drafted by one party and accepted by the other without negotiation. The Trustworthy AI guidelines ask for particular attention to situations ``characterised by asymmetries of power or information, such as between employers and workers, or between businesses and consumers''~\citep{hleg2019}, and online Terms of Service are a textbook case. Consumers agree without reading, consumer organisations have the competence to control terms but lack the resources, and businesses keep using unlawful clauses~\citep{slides_claudette}. Claudette was designed as a countervailing power: AI on the consumers' side of the asymmetry~\citep{lippi2019claudette}. Our system continues that project and adds explanations grounded in legal sources and protection beyond English.
+
+Table~\ref{tab:stakes} lists the plausible users and what each kind of error costs them. A third kind of error cuts across the table: a \emph{wrong but convincing explanation}, which makes the other two errors more likely to be believed. It is specific to systems that generate text, and our evaluation shows that it is real (Section~\ref{sec:ethics-kant}).
+
+\begin{table}[t]
+\centering\small
+\caption{Plausible users of the system and the cost of its two kinds of error.}
+\label{tab:stakes}
+\begin{tabularx}{\textwidth}{@{}p{2.6cm}XXX@{}}
+\toprule
+User & Purpose & Cost of a missed unfair clause & Cost of a false alarm \\
+\midrule
+Consumer & Understand a contract before accepting it & False reassurance: bound by a term they would have questioned & Time; possible unjustified distrust of a fair service \\
+Consumer organisation & Screen many contracts and select cases for action & An unlawful term stays in use for all customers of the service & Wasted legal review; credibility if an action is wrongly started \\
+Supervisory authority & Market-wide sweeps & As above, at market scale & Enforcement resources; undue pressure on a business \\
+Court & Check terms of its own motion (Section~\ref{sec:ethics-consumer}) & A consumer bound by an unfair term in a judicial decision & A fair term set aside, unless the judge catches the error \\
+Business & Check its own Terms before publishing them & Non-compliance and its sanctions & Over-cautious drafting \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -------------------------------------------------------------------------------------
+\subsection{Legal framework}
+
+\subsubsection{Consumer protection law: the norm the system applies}
+\label{sec:ethics-consumer}
+
+The system does not apply its own idea of fairness: it applies Directive 93/13/EEC~\citep{dir93}, as operationalised by the legal experts who annotated the Claudette corpus. Four provisions shape what it can and cannot claim.
+
+\begin{itemize}
+  \item \textbf{Article 3(1)} defines an unfair term through two open standards, good faith and a significant imbalance to the detriment of the consumer, and the Annex gives an indicative, non-exhaustive list of suspicious terms. This is why the labels say \emph{potentially} unfair: a term on the list is a strong signal, not a verdict. Only a court decides; the output of the system is at most a reasoned suspicion, and the interface words it that way (``flagged for a closer look'', never ``unlawful'').
+  \item \textbf{Article 4(1)} requires unfairness to be assessed in the light of the nature of the service, the circumstances of the contract and \emph{all the other terms} of the contract. The system reads one sentence at a time and cannot see a clause that neutralises another a few lines later. This is a structural limit of the design, not a matter of tuning.
+  \item \textbf{Article 5} requires plain and intelligible language and resolves doubts in favour of the consumer. The same standard applies, ethically, to our explanations: an explanation that a consumer cannot follow empowers no one.
+  \item \textbf{Article 7} requires adequate and effective means to stop the use of unfair terms, including actions by organisations with a legitimate interest in protecting consumers. Directive 93/13 is among the laws that qualified entities can enforce through representative actions~\citep{rad2020}, and Directive (EU) 2019/2161 added penalties for its infringement~\citep{dir2019_2161}. Consumer organisations are therefore the users for whom a screening tool adds most value, and they have the standing to act on its findings.
+\end{itemize}
+
+Two judgments in our knowledge base bear on the use of the system. In \emph{Oc\'eano}~\citep{cjeu_oceano} the Court of Justice held that national courts may examine the unfairness of a term of their own motion, and later case law (\emph{Pannon GSM}, C-243/08) made this a duty: courts are thus a plausible user of a screening tool. \emph{Amazon}~\citep{cjeu_amazon} concerns choice-of-law terms that mislead consumers about the protection they keep under the law of their own country, one of our eight categories.
+
+Two categories are also governed by a second regime. On online platforms, clauses on content removal and on the termination of accounts are subject to Article~14 of the Digital Services Act~\citep{dsa2022}: terms and conditions must be clear and unambiguous, and restrictions must be applied in a diligent, objective and proportionate manner, with due regard to fundamental rights such as freedom of expression.
+
+\subsubsection{The AI Act}
+\label{sec:ethics-aiact}
+
+The system is an AI system in the sense of Article~3(1) of the AI Act~\citep{aiact2024}: it infers from its input how to generate outputs (verdicts and explanations). Our prototype, however, was developed for research only, and the Act does not apply to systems developed and put into service for the sole purpose of scientific research, nor to research and testing before a system is placed on the market (Articles~2(6) and 2(8); testing in real-world conditions is not exempt). The analysis below therefore asks what would apply if the system were offered to others.
+
+\paragraph{Roles.} Whoever offered the system would be the \emph{provider} of an AI system (Article~3(3)) built on a general-purpose AI model. The providers of the models (OpenAI for gpt-4.1-mini, the Qwen team for Qwen3.6-27B) have their own obligations under Article~53, including information for the providers who build on their models. A consumer organisation using the system professionally would be a \emph{deployer} (Article~3(4)); a consumer using it privately would not.
+
+\paragraph{Classification by intended purpose.} The Act regulates purposes, not techniques~\citep{slides_aiact}, so the same system falls in different classes depending on who uses it for what (Table~\ref{tab:aiact}).
+
+\begin{table}[t]
+\centering\small
+\caption{Classification of the system under the AI Act, as amended by the Digital Omnibus on AI~\citep{omnibus2026}.}
+\label{tab:aiact}
+\begin{tabularx}{\textwidth}{@{}p{3.3cm}p{2.6cm}X@{}}
+\toprule
+Intended use & Class & Main obligations and dates \\
+\midrule
+Research prototype (this project) & Outside the scope & Articles 2(6) and 2(8). \\
+Tool for consumers, consumer organisations, authorities or businesses & Not high-risk (not in Annex III) & Article~50(1): people must be informed that they interact with an AI system, unless this is obvious. Article~50(2): synthetic text, such as our explanations, must be marked in a machine-readable format. Both apply since 2~August 2026. Article~4: providers and deployers take measures to support the AI literacy of their staff. \\
+Tool for courts or alternative dispute resolution & High-risk (Annex III, point 8(a)), unless the filter of Article~6(3) applies & Articles 9--15 and the obligations of providers and deployers, from 2~December 2027. A public body deploying it must carry out a fundamental rights impact assessment (Article~27). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Point 8(a) of Annex III covers systems ``intended to be used by a judicial authority or on their behalf to assist a judicial authority in researching and interpreting facts and the law and in applying the law to a concrete set of facts, or to be used in a similar way in alternative dispute resolution''. Deciding whether a term of a contract is unfair is applying the law to a concrete set of facts. Article~6(3) excludes systems that do not materially influence the outcome of decisions, for example because they only perform ``a preparatory task to an assessment''. A tool that merely points a judge to clauses worth reading could arguably qualify; a tool whose verdicts and explanations end up in the reasoning of a decision could not, and the provider must document the assessment (Article~6(4)). Given how convincing our explanations are even when wrong, we would not rely on the filter for judicial use.
+
+Table~\ref{tab:highrisk} compares the high-risk requirements with what the project already provides. Much of what the requirements ask for exists because good research practice asks for the same things: documented data, reproducible results, logged outputs and measured accuracy. The gaps are the organisational parts (a risk management process, monitoring after deployment) and two technical ones: evidence that human oversight works in practice, and adversarial testing.
+
+\begin{table}[t]
+\centering\small
+\caption{High-risk requirements of the AI Act (Articles 9--15) and the state of the project.}
+\label{tab:highrisk}
+\begin{tabularx}{\textwidth}{@{}p{2.9cm}XX@{}}
+\toprule
+Requirement & Already in the project & Missing for compliance \\
+\midrule
+Risk management (Art.~9) & Risks identified and, where possible, measured (Section~\ref{sec:ethics-risks}) & A continuous process over the life cycle; monitoring after deployment \\
+Data and data governance (Art.~10) & Public, documented datasets; official chronological splits; leakage checked; knowledge base built from the training split only; evaluation per category and per language & Representativeness beyond Terms of large platforms and four languages; licences for a commercial use (the multilingual corpus is CC BY-NC 2.5) \\
+Technical documentation (Art.~11) & Code, tests, README and this report; every number reproducible from saved files & The format of Annex IV \\
+Record-keeping (Art.~12) & In the experiments, every model answer, citation and retrieved id is logged & The demo stores nothing (data minimisation). A high-risk use needs logs, e.g.\ of verdicts and evidence ids, reconciled with the GDPR \\
+Transparency to deployers (Art.~13) & About page: purpose, decision steps, measured precision and recall, recall per language, limits & Formal instructions for use \\
+Human oversight (Art.~14) & Precedents next to the citations, borderline list, ``no verdict'' when the model fails, the steps of each decision, ``not flagged'' never shown as ``fair'' & Evidence that users actually catch wrong verdicts; awareness of automation bias (Art.~14(4)(b)) \\
+Accuracy, robustness, cybersecurity (Art.~15) & Test-set metrics with confidence intervals and significance tests; replication with a second model; 98.3\% stable answers; faithfulness test & Adversarial testing (instructions hidden in contract text); monitoring as contracts and models change \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Data protection}
+\label{sec:ethics-gdpr}
+
+The datasets are Terms of Service of companies, not data about individuals; the GDPR~\citep{gdpr2016} matters for what users submit.
+
+\begin{itemize}
+  \item \textbf{Article 22 does not apply.} It protects people from decisions based solely on automated processing, including profiling, that produce legal or similarly significant effects on them. The system takes no decision about a person and profiles no one, and as a decision-support tool it already fails the condition of a decision ``solely'' automated~\citep{slides_gdpr}.
+  \item \textbf{Minimisation and transfers.} A pasted contract may contain personal data, for example in a personalised agreement. With gpt-4.1-mini, the text goes to an external provider acting as processor (Article~28), possibly outside the EU (Chapter~V). The demo stores nothing and warns users not to paste personal data. The replication with Qwen3.6-27B on the university's own cluster\xref{sec:multilingual} showed the same quality with the text never leaving the infrastructure of the deployer: a concrete option for data protection by design (Article~25), which also removes the dependence on one vendor.
+  \item \textbf{Transparency as a model.} Articles~13(2)(f) and 14(2)(g) require ``meaningful information about the logic involved'' in automated decisions. The system is not subject to them, but the idea guides the interface: users see the logic (retrieval, model, citation check, gate) and the evidence behind each verdict, not only the verdict. Claudette has applied the same principles of comprehensiveness, clarity and substantive compliance to privacy policies~\citep{slides_claudette}; our knowledge base does not yet cover privacy clauses.
+\end{itemize}
+
+\subsubsection{Fundamental rights}
+\label{sec:ethics-rights}
+
+Fundamental rights are the ethical basis of the Trustworthy AI guidelines and are binding through the Charter~\citep{charter2012}. Five are directly involved.
+
+\begin{itemize}
+  \item \textbf{Consumer protection} (Article~38 of the Charter) is the reason the system exists.
+  \item \textbf{Effective remedy and fair trial} (Article~47 of the Charter; Article~8 of the Universal Declaration~\citep{udhr1948}). Arbitration and jurisdiction clauses restrict exactly this right, by moving disputes away from the courts of the consumer. A missed arbitration clause, like the one the gate overruled in our demo example\xref{sec:demo}, is therefore not a minor error.
+  \item \textbf{Freedom of expression} (Article~11): content removal and termination clauses decide when a platform may silence its users.
+  \item \textbf{Freedom to conduct a business} (Article~16): false alarms affect businesses whose clauses are lawful. The wording ``potentially unfair'' and human review protect this right.
+  \item \textbf{Non-discrimination} (Article~21 of the Charter; Articles~2 and 7 of the Universal Declaration), which both list \emph{language} among the prohibited grounds. A tool that protects consumers who read English and not those who read Polish distributes a legal protection by language. Our multilingual evaluation\xref{sec:multilingual} turns this principle into a measurement. English-only models (Legal-BERT, TF-IDF) find 55--73\% of the unfair English clauses and almost none in German, Italian and Polish. RAG with the evidence gate (measured with Qwen3.6-27B) finds 77.2, 72.1, 75.1 and 73.9\% in English, German, Italian and Polish: every recall ratio to English is within the parity band of 0.8--1.25, and no difference from English is significant. German is the lowest for every multilingual system, and a deployment should monitor it.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\subsection{Trustworthy AI}
+\label{sec:ethics-hleg}
+
+The guidelines ask that a system be lawful, ethical and robust, and translate four principles (respect for human autonomy, prevention of harm, fairness and explicability) into seven requirements~\citep{hleg2019,slides_trustworthy}. Table~\ref{tab:hleg} assesses the system against each requirement. As the guidelines insist, this is not a checklist to tick but a record of evidence and open issues.
+
+\begin{table}[t]
+\centering\small
+\caption{The seven requirements of Trustworthy AI: evidence from the project and open issues.}
+\label{tab:hleg}
+\begin{tabularx}{\textwidth}{@{}p{2.6cm}XX@{}}
+\toprule
+Requirement & What the system does (evidence) & Open issues \\
+\midrule
+Human agency and oversight & Flags, never decides; shows precedents, borderline cases and the steps of each decision (human in the loop) & No user study on whether people over-trust it \\
+Technical robustness and safety & Macro-F1 79.4 on the test set, statistically on par with Legal-BERT; same result with an open-weight model (79.0, difference not significant); 98.3\% stable answers; fallbacks: evidence-only mode and ``no verdict'' on failure & Misses about one unfair clause in six; no adversarial tests \\
+Privacy and data governance & No personal data in the datasets; nothing stored; on-premise option & In the default configuration, user text goes to a third-party API \\
+Transparency & Traceability: logged answers, saved retrieved ids, dated model snapshot, fixed seed. Explainability: citations checked (no invented ids). Communication: ``AI system'', ``not legal advice'', measured accuracy & Citations are faithful but not the whole reason: removing them flips 27.8\% of unfair verdicts, against 8.2\% for other items \\
+Diversity, non-discrimination and fairness & Parity across four languages under four group fairness criteria (equality of opportunity, false-alarm rate, conditional use error, statistical parity) & Only four languages; annotations from one team; accessibility not evaluated; stakeholders not involved \\
+Societal and environmental well-being & Supports consumer organisations; the document mode skips 86\% of the model calls without changing any verdict; an evidence-only mode without LLM & Energy not measured; possible dual use by businesses \\
+Accountability & Code, data and results open to audit; trade-offs documented (the gate); flags can be contested because the evidence is shown & No accountable organisation and no redress channel for businesses wrongly flagged \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The guidelines also ask to acknowledge tensions between the principles. Three are visible in the project.
+\begin{itemize}
+  \item \textbf{Harm to consumers and harm to businesses.} Preventing harm to consumers favours recall (flag more); fairness to businesses and the usefulness of the tool favour precision (flag less). The evidence gate resolves the tension in one direction by a rule fixed in advance (Section~\ref{sec:ethics-consequences}).
+  \item \textbf{Traceability and privacy.} Logs make decisions auditable but store what users submitted.
+  \item \textbf{Explicability and autonomy.} A more persuasive explanation can weaken the user's own judgment instead of supporting it (Section~\ref{sec:ethics-kant}).
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\subsection{Ethical theories}
+
+\subsubsection{Consequentialism: what the evidence gate buys and what it costs}
+\label{sec:ethics-consequences}
+
+For a consequentialist, the right choice is the one with the best outcomes~\citep{slides_consequentialism}. Our most consequential design choice is the evidence gate, and its outcomes can be counted. On the English test set (1,607 sentences, 172 unfair), the gate changes the RAG system as follows:
+
+\begin{center}\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+& RAG without the gate & RAG + gate & Change \\
+\midrule
+Unfair sentences found & 160 & 144 & $-16$ \\
+False alarms & 131 & 31 & $-100$ \\
+Precision & 55.0\% & 82.3\% & \\
+Recall & 93.0\% & 83.7\% & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Let $c_m$ be the harm of a missed unfair clause and $c_f$ the cost of a false alarm. The gate is the better choice if and only if $16\,c_m < 100\,c_f$, that is, if a missed clause costs less than $6.25$ false alarms. For a consumer organisation this looks doubtful. A false alarm costs a lawyer a few minutes, while a missed clause can leave an unfair term in force for millions of customers. Two considerations change the picture.
+\begin{itemize}
+  \item \textbf{False alarms have an indirect cost that a one-by-one count misses.} A tool that flags 291 sentences, 131 of them wrongly, teaches its users to ignore it, and then even its correct flags lose their effect.
+  \item \textbf{The demo does not discard what the gate removes.} It lists those sentences as borderline, so part of the 16 misses stays visible to a careful reader.
+\end{itemize}
+The calculus therefore depends on the user: a consumer reading one contract is best served by high precision, while an organisation doing a systematic review should read the borderline list too.
+
+\paragraph{Act and rule.} The gate was chosen on the validation set by a rule fixed in advance (the best macro-F1 among the settings with a recall of at least 80\%) and then applied unchanged, even when, in our demo example, it removed an arbitration clause that the model had recognised correctly. Adjusting the threshold case by case would fix that case, at the price of making the reported accuracy meaningless. This is rule utilitarianism: a rule that is beneficial when followed consistently, here ``fix the thresholds before seeing the test data''.
+
+\paragraph{Distribution.} Utilitarianism sums outcomes; the course asks whether their distribution matters~\citep{slides_consequentialism}. The aggregate F1 score hides two distributions that we measured.
+\begin{itemize}
+  \item \textbf{By category.} The gate costs most for content removal (recall from 85\% to 62\%) and limitation of liability (84\% to 71\%), and little for jurisdiction (100\% to 94\%).
+  \item \textbf{By language.} German has the lowest recall in every multilingual system.
+\end{itemize}
+A designer who only maximised the aggregate would accept both. We report them so that the deployer can decide.
+
+\subsubsection{Kantian ethics: consent, persons as ends, and a truthful tool}
+\label{sec:ethics-kant}
+
+The universalizability test~\citep{kant1785,slides_deontology} can be applied first to the practice the system detects. A drafter of unfair standard terms acts on a maxim such as: ``when consumers will not read my terms, I shall include terms that shift risks onto them, in order to obtain advantages they would not accept if they understood them''. This is a variant of the course example ``I shall deceive my contractual partner, to increase my gains''. If every business acted on it, clicking ``I agree'' would no longer express agreement to anything a person could understand. The drafter's own aim, binding consumers through their acceptance, presupposes the meaningful consent that universal adoption would empty. This is a contradiction in conception, like the course example of cheating in an exam: the maxim exploits a practice that would destroy itself if universalised. The formula of humanity gives the same answer from another side: consent that cannot be informed treats the consumer merely as a means. The requirement of good faith in Directive 93/13 can be read as the legal form of this duty.
+
+For the system itself, Kantian ethics gives three requirements, all implemented:
+\begin{itemize}
+  \item \textbf{Respect autonomy, do not replace it.} The system informs; it never accepts or rejects a contract on the consumer's behalf.
+  \item \textbf{Do not deceive.} For a tool, deception can be silent: presenting ``not flagged'' as ``fair'', or a failure of the model as a clean result. The interface excludes both.
+  \item \textbf{Do not persuade beyond the evidence.} Our evaluation of the explanations found that grounding is not correctness\xref{sec:explanations}.
+    \begin{itemize}
+      \item Wrong flags cite legal sources as often as correct ones: 100\% of both.
+      \item Wrong flags less often have an expert-labelled precedent of the same category: 62\% against 79\% with the gate, and 35\% against 76\% without it.
+      \item 64 false alarms disappear when the cited items are removed, so the evidence itself primed them.
+    \end{itemize}
+    An explanation that sounds equally authoritative when it is wrong manipulates the reader's judgment even without any intention to deceive. Showing the precedents, which separate right from wrong flags far better than the citations do, is the honest answer.
+\end{itemize}
+Finally, the good will that Kant places at the centre of morality belongs to the people who build and use the system: a language model has no will, and the responsibility for its outputs stays with them.
+
+\subsubsection{Prima facie duties and defeasible reasoning}
+
+The designer's position is better described by Ross's plural duties than by one absolute rule~\citep{ross1930,slides_deontology}. Four duties all bind prima facie, and they conflict:
+\begin{itemize}
+  \item \textbf{beneficence:} protect consumers, which means flagging more;
+  \item \textbf{non-injury:} do not wrongly accuse lawful terms, which means flagging less;
+  \item \textbf{justice:} give the same protection in every language;
+  \item \textbf{fidelity:} report results truthfully.
+\end{itemize}
+The gate, the borderline list and the report per language are our way of weighing them, with the weights made explicit.
+
+Defeasibility also describes the legal knowledge itself. The rules of our knowledge base are defeasible rules in the sense of the course~\citep{slides_defeasible}: ``a limitation of liability is potentially unfair'' holds unless an exception applies, such as a clause that preserves liability for death or personal injury, which the knowledge base marks as clearly fair. The demo shows the exception at work: in our sample Terms, the limitation of liability is flagged and the next sentence, which preserves liability for personal injury, is not.
+
+The evidence gate is a defeater of a different kind. When the conclusion of the model collides with the precedents, the precedents prevail for the purpose of flagging. The conclusion is not deleted, though: it is shown as borderline, and the final judgment rests with a human. This is the ``hybrid AI with human in the loop'' that the course proposes between systems that handle exceptions on their own and systems that always defer to humans~\citep{slides_deontology}.
+
+\subsubsection{Justice: Rawls, Habermas and the virtues of the developers}
+
+\paragraph{Rawls.} Behind a veil of ignorance~\citep{rawls1971}, a person would not know whether she will read her contracts in English or in Polish, or whether she can afford a lawyer. She would not choose a protective tool that works only in English, which is what an English-only classifier is. Fair equality of opportunity requires that legal protection does not depend on such an arbitrary factor. The difference principle favours tools whose benefits reach the least advantaged: consumers without legal knowledge and readers of less-resourced languages. Parity across languages is the condition for the system to be just in this sense, and the lower recall in German shows that the condition must be checked, not assumed.
+
+\paragraph{Habermas.} Discourse ethics adds a point about procedure. Terms of Service are norms that the affected party cannot discuss. Our system contains norms that affect others too, above all the threshold that decides what counts as enough evidence, and we set them alone. A deployment should set them together with those affected: consumer organisations, legal experts and businesses.
+
+\paragraph{Virtue ethics} turns attention to the developers~\citep{slides_deontology}:
+\begin{itemize}
+  \item \textbf{honesty} about capabilities: the About page states that the system misses about one unfair clause in six;
+  \item \textbf{justice:} parity was tested before it was claimed;
+  \item \textbf{responsibility:} reproducible results, and a replication with an open model;
+  \item \textbf{practical wisdom} in the choices that no metric settles, such as where to put a threshold.
+\end{itemize}
+
+% -------------------------------------------------------------------------------------
+\subsection{Risks and mitigations}
+\label{sec:ethics-risks}
+
+Table~\ref{tab:risks} collects the risks identified in this analysis, the evidence for each, what the system already does about it and what remains. Two risks were not tested and deserve attention in any further work.
+\begin{itemize}
+  \item \textbf{Instructions hidden in the contract text.} The text submitted to the model is written by the party with an interest in the verdict, so a drafter could add text addressed to the model rather than to the reader.
+  \item \textbf{Adversarial drafting.} A business could rephrase a clause until nothing is flagged.
+\end{itemize}
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Risks, evidence and mitigations.}
+\label{tab:risks}
+\begin{tabularx}{\textwidth}{@{}p{2.7cm}XXX@{}}
+\toprule
+Risk & Evidence & Mitigation in the system & Residual risk \\
+\midrule
+Over-reliance on verdicts (automation bias) & Wrong flags cite legal sources as often as correct ones & Precedents, borderline list, steps of the decision, ``not flagged'' never shown as ``fair'' & No user study \\
+False reassurance (missed clauses) & Recall 83.7\% on the test set, 72--77\% on the multilingual set & Borderline list; the About page states the miss rate & Rare categories and clauses that depend on context \\
+Alarm fatigue and unjustified accusations & 131 false alarms without the gate & The gate (31 false alarms); the wording ``potentially unfair'' & 2.2\% of fair sentences still flagged \\
+Unequal protection by language & English-only models: almost no unfair clause found outside English & Multilingual retrieval and model; parity measured & German lowest; languages not tested \\
+Instructions hidden in the contract text (prompt injection) & Not tested & The gate can only remove the model's categories, never add one; the evidence-only mode does not read instructions & An injected instruction could suppress flags \\
+Adversarial drafting and dual use & A business can rephrase until nothing is flagged & None technical; the categories are public & ``Compliance washing''; legitimate self-checking is also possible \\
+Personal data in submitted text & -- & Nothing stored; warning; on-premise model & Third-party API in the default configuration \\
+Vendor dependence and reproducibility & Results depend on a dated commercial model & Replication with an open-weight model, no significant difference & Prompts and knowledge base developed on one model \\
+Outdated knowledge & Precedents from Terms written between 2006 and 2016; law and case law evolve & Knowledge base versioned, with its sources & No update process \\
+Blindness to context (Art.~4(1) of the Directive) & The system reads single sentences & -- & A clause neutralised elsewhere in the contract can still be flagged \\
+Environmental cost & One model call per checked sentence & The document mode skips 86\% of the calls; evidence-only mode; local model & Energy not measured \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -------------------------------------------------------------------------------------
+\subsection{Conditions for a responsible deployment}
+\label{sec:ethics-conditions}
+
+The system is a research prototype. Before others rely on it, we would require five things.
+\begin{enumerate}
+  \item \textbf{A review of the explanations by legal experts.} Our automatic checks show that the explanations are grounded and faithful, not that their legal reasoning is right. We did not carry out the human evaluation we had planned, and this is the most important gap of the project.
+  \item \textbf{A user study on over-reliance}, with consumers and with lawyers: do the precedents and the borderline list actually help people catch wrong verdicts?
+  \item \textbf{A documented intended purpose,} as the AI Act requires.
+    \begin{itemize}
+      \item For consumers and organisations: the transparency obligations of Article~50, including machine-readable marking of the explanations.
+      \item For courts: either the full high-risk regime, from 2~December 2027, or a documented argument that the system only performs a preparatory task; in both cases, a fundamental rights impact assessment by the public deployer.
+    \end{itemize}
+  \item \textbf{Stakeholder involvement:} thresholds and categories discussed with those affected, and performance per language monitored in use.
+  \item \textbf{A default configuration} that keeps the submitted text on infrastructure controlled by the deployer.
+\end{enumerate}
+
+Under these conditions, the ethical balance is favourable. The system strengthens the weaker party of an asymmetric relationship, gives reasons that can be checked and contested, and protects consumers equally across the four languages we tested. Without them, it risks becoming one more black box that people trust because it sounds like a lawyer.

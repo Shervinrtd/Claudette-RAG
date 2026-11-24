@@ -1,0 +1,38 @@
+% =====================================================================================
+% Work organisation: how the work was split (required by the project rules for groups).
+% Included by the final report.
+% =====================================================================================
+\section{Work organisation}
+\label{sec:work}
+
+The project was carried out by Alireza Shahidiani and Kiana Alian. We kept the split agreed in the initial report:
+\begin{itemize}
+  \item \textbf{Alireza Shahidiani:} the legal knowledge base, the RAG pipeline (retrieval, prompting, explanation generation) and the demo;
+  \item \textbf{Kiana Alian:} the BERT and LLM baselines, the evaluation framework, and the multilingual fairness analysis and mitigation;
+  \item \textbf{both:} data preparation, the evaluation of the explanations, the ethical and legal analysis, and this report.
+\end{itemize}
+Each part had one owner, and the other member reviewed it before it was merged. Table~\ref{tab:work} maps each part to the code and outputs in the repository.
+
+\begin{table}[ht]
+\centering\small
+\caption{Who was responsible for each part of the project.}
+\label{tab:work}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{5.6cm}p{2.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Part of the project & Responsible & Main code and outputs \\
+\midrule
+Data download, exploration and preparation (UNFAIR-ToS, multilingual Claudette corpus) & Both & \texttt{notebooks/}, \texttt{download\_data.py}, \texttt{download\_multilingual.py}, \texttt{text.py} \\
+Legal knowledge base (categories, rationales, provisions, sources) & Alireza & \texttt{knowledge\_base/}, \texttt{build\_knowledge\_base.py}, \texttt{knowledge\_base.py} \\
+Retrieval: embedding index, retrieval quality, kNN baseline & Alireza & \texttt{build\_index.py}, \texttt{eval\_retrieval.py}, \texttt{retrieval.py} \\
+RAG system: prompt with citations, explanation generation, evidence gate, ablations & Alireza & \texttt{rag.py}, \texttt{run\_rag.py}, \texttt{gate\_rag.py} \\
+Baselines: always fair, TF-IDF + SVM, plain LLM, Legal-BERT & Kiana & \texttt{baseline\_tfidf.py}, \texttt{run\_llm.py}, \texttt{train\_bert.py}, \texttt{bert.py} \\
+Evaluation framework: LexGLUE metrics, bootstrap intervals, paired bootstrap and McNemar tests, comparison of systems & Kiana & \texttt{evaluation.py}, \texttt{evaluate.py}, \texttt{compare\_systems.py} \\
+Evaluation of the explanations: grounding, faithfulness, stability, error analysis & Both & \texttt{explanation\_quality.py}, \texttt{faithfulness.py}, \texttt{error\_analysis.py} \\
+Multilingual fairness: evaluation set, baselines in four languages, fairness criteria by language, mitigation & Kiana & \texttt{prepare\_multilingual\_eval.py}, \texttt{baselines\_multilingual.py}, \texttt{multilingual\_fairness.py} \\
+Open-weight replication on the DISI GPU cluster (vLLM, Slurm) & Alireza & \texttt{hpc/}, local-server support in \texttt{llm.py} \\
+Demo & Alireza & \texttt{demo.py} (script and module), \texttt{pipeline.py} \\
+Ethical and legal analysis & Both & Section~\ref{sec:ethics} \\
+Final report & Both & This document \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -7,6 +7,25 @@ Project for the *Ethics in Artificial Intelligence* course, University of Bologn
 - Alireza Shahidiani (alireza.shahidiani@studio.unibo.it)
 - Kiana Alian (kiana.alian@studio.unibo.it)
 
+### Who did what
+
+We kept the split agreed in the initial report. Each part had one owner, and the other member reviewed it before merging.
+
+| Part | Responsible | Main files |
+|---|---|---|
+| Data download, exploration and preparation | Both | `notebooks/`, `scripts/download_*.py`, `src/claudette_rag/text.py` |
+| Legal knowledge base | Alireza | `knowledge_base/`, `scripts/build_knowledge_base.py`, `src/claudette_rag/knowledge_base.py` |
+| Retrieval (embedding index, retrieval quality, kNN baseline) | Alireza | `scripts/build_index.py`, `scripts/eval_retrieval.py`, `src/claudette_rag/retrieval.py` |
+| RAG system (prompt with citations, explanation generation, evidence gate, ablations) | Alireza | `src/claudette_rag/rag.py`, `scripts/run_rag.py`, `scripts/gate_rag.py` |
+| Baselines (always fair, TF-IDF + SVM, plain LLM, Legal-BERT) | Kiana | `scripts/baseline_tfidf.py`, `scripts/run_llm.py`, `scripts/train_bert.py`, `src/claudette_rag/bert.py` |
+| Evaluation framework (LexGLUE metrics, bootstrap intervals, significance tests, comparison of systems) | Kiana | `src/claudette_rag/evaluation.py`, `scripts/evaluate.py`, `scripts/compare_systems.py` |
+| Evaluation of the explanations (grounding, faithfulness, stability, error analysis) | Both | `scripts/explanation_quality.py`, `scripts/faithfulness.py`, `scripts/error_analysis.py` |
+| Multilingual fairness (evaluation set, baselines in four languages, fairness by language, mitigation) | Kiana | `scripts/prepare_multilingual_eval.py`, `scripts/baselines_multilingual.py`, `scripts/multilingual_fairness.py` |
+| Open-weight replication on the DISI GPU cluster | Alireza | `hpc/`, local-server support in `src/claudette_rag/llm.py` |
+| Demo | Alireza | `scripts/demo.py`, `src/claudette_rag/demo.py`, `src/claudette_rag/pipeline.py` |
+| Ethical and legal analysis | Both | `report/sections/ethics_law.tex` |
+| Final report | Both | `report/` |
+
 ## Goal
 
 Online Terms of Service (ToS) often contain clauses that are potentially unfair to consumers under EU consumer law (Directive 93/13/EEC). This project builds a Retrieval-Augmented Generation (RAG) system that detects such clauses **and explains why** they are unfair, by retrieving legal rationales and annotated examples from a structured knowledge base. The system is compared with a fine-tuned BERT classifier and with an LLM without retrieval, and evaluated for explainability, robustness and fairness across languages.
@@ -443,5 +462,5 @@ Limits of the demo:
 - [x] Phase 5: evaluation of the explanations (grounding, error analysis, faithfulness, stability)
 - [x] Phase 6: multilingual fairness (extension): open-weight replication on the DISI cluster, fairness by language
 - [x] Phase 7: demo (extension): web app for clauses and whole documents (`scripts/demo.py`)
-- [ ] Phase 8: ethical and legal analysis
+- [x] Phase 8: ethical and legal analysis (`report/sections/ethics_law.tex`; standalone draft: `latexmk -pdf ethics_law.tex` in `report/`)
 - [ ] Phase 9: final report

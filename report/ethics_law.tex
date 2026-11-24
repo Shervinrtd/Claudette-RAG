@@ -1,0 +1,39 @@
+% Standalone draft of the ethical and legal analysis (Phase 8). The final report includes
+% sections/ethics_law.tex directly; compile this file to read the section on its own:
+%     latexmk -pdf ethics_law.tex      (from the report/ folder)
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2cm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue!50!black, citecolor=blue!40!black}
+\setlist{itemsep=2pt, topsep=4pt}
+\renewcommand{\arraystretch}{1.15}
+
+% reference to another section of the final report: prints nothing in this draft
+% (the final report defines it as ~(Section~\ref{#1}))
+\newcommand{\xref}[1]{}
+
+\title{\textbf{Claudette-RAG: Ethical and Legal Analysis}\\[4pt]
+\large Draft section of the final report -- Ethics in Artificial Intelligence}
+\author{Alireza Shahidiani \and Kiana Alian}
+\date{University of Bologna -- \today}
+
+\begin{document}
+\maketitle
+
+\input{sections/ethics_law}
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+
+\end{document}
